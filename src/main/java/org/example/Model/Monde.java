@@ -64,3 +64,13 @@ public class Monde {
         }
     }
 }
+
+//def afficher_grille(grille: list[list[str]]):
+//    """Affiche la grille dans la console avec les jetons placés."""
+//    print("-------------")  # Affiche la bordure supérieure
+//    for ligne in grille:  # Parcourt chaque ligne de la grille
+//        ligne_affichage = "|"  # Commence la ligne avec un |
+//        for case in ligne:  # Parcourt chaque case de la ligne
+//            ligne_affichage += case + "|"  # Ajoute la case et un | pour la séparation
+//        print(ligne_affichage)  # Affiche la ligne complète
+//        print("-------------")  # Affiche une bordure après la ligne
