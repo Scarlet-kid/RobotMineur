@@ -47,22 +47,22 @@ public class Monde {
         System.out.println("=== Tour " + tourActuel + " ===");
     }
 
-    public void afficher() {
+    public static void afficherGrille(String[][] grille) {
+        System.out.println("-------------");
 
-        System.out.println("Tour : " + tourActuel);
+        for (String[] ligne : grille) {
+            String ligneAffichage = "|";
 
-        for (int ligne = 0; ligne < 10; ligne++) {
-
-            for (int colonne = 0; colonne < 10; colonne++) {
-
-                System.out.print(
-                        "[" + grille[ligne][colonne].afficher() + "]"
-                );
+            for (String cellule : ligne) {
+                ligneAffichage += cellule + "|";
             }
 
-            System.out.println();
+            System.out.println(ligneAffichage);
+            System.out.println("-------------");
         }
+
     }
+
 }
 
 //def afficher_grille(grille: list[list[str]]):
