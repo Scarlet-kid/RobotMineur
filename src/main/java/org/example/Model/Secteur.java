@@ -26,9 +26,16 @@ public class Secteur {
         return estEau;
     }
 
-    public Robot getRobot(){
+    public Robot getRobot() {
         return robot;
     }
+
+    public void setEstEau(boolean estEau) {
+        this.estEau = estEau;
+    }
+
+
+
 
     public void setRobot(Robot robot) {
         this.robot = robot;
@@ -41,6 +48,7 @@ public class Secteur {
     public void setComposante(Composantes composante) {
         this.composante = composante;
     }
+
     public boolean estLibre() {
 
         if (estEau) {
@@ -65,10 +73,7 @@ public class Secteur {
             return "E " + composante.getNumero();
 
         return "   ";
-<<<<<<< HEAD
     }
-=======
->>>>>>> 23faaedfed3b822b8939246c85f6884b3c821a13
 
     public String getAffichageBas() {
 
@@ -79,4 +84,4 @@ public class Secteur {
 
         return "   ";
     }
-    }
+}
