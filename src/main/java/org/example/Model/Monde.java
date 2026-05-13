@@ -47,7 +47,7 @@ public class Monde {
         System.out.println("=== Tour " + tourActuel + " ===");
     }
 
-    public static void afficherGrille(String[][] grille) {
+    public void afficher(String[][] grille) {
         System.out.println("-------------");
 
         for (String[] ligne : grille) {
