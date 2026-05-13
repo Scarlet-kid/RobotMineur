@@ -47,30 +47,44 @@ public class Monde {
         System.out.println("=== Tour " + tourActuel + " ===");
     }
 
-    public void afficher(String[][] grille) {
-        System.out.println("-------------");
+    public void afficher() {
+        System.out.println();
 
-        for (String[] ligne : grille) {
-            String ligneAffichage = "|";
+        System.out.print("     ");
+        for (int j = 0; j < 10; j++) {
+            System.out.print(j + "    ");
+        }
+        System.out.println();
 
-            for (String cellule : ligne) {
-                ligneAffichage += cellule + "|";
+        dessinerLigneBordure();
+
+        for (int i = 0; i < 10; i++) {
+            System.out.print(" " + i + " |");
+            for (int j = 0; j < 10; j++) {
+                // Remplacer "  " par l'appel à votre méthode (ex: grille[i][j].getAffichageHaut())
+                System.out.print(" " + "  " + " |");
             }
+            System.out.println();
 
-            System.out.println(ligneAffichage);
-            System.out.println("-------------");
+            System.out.print("   |");
+            for (int j = 0; j < 10; j++) {
+                // Remplacer "  " par l'appel à votre méthode (ex: grille[i][j].getAffichageBas())
+                System.out.print(" " + "  " + " |");
+            }
+            System.out.println();
+
+            dessinerLigneBordure();
         }
 
+        System.out.println("\ntour\t" + tourActuel);
+    }
+
+    private void dessinerLigneBordure() {
+        System.out.print("   +");
+        for (int j = 0; j < 10; j++) {
+            System.out.print("----+");
+        }
+        System.out.println();
     }
 
 }
-
-//def afficher_grille(grille: list[list[str]]):
-//    """Affiche la grille dans la console avec les jetons placés."""
-//    print("-------------")  # Affiche la bordure supérieure
-//    for ligne in grille:  # Parcourt chaque ligne de la grille
-//        ligne_affichage = "|"  # Commence la ligne avec un |
-//        for case in ligne:  # Parcourt chaque case de la ligne
-//            ligne_affichage += case + "|"  # Ajoute la case et un | pour la séparation
-//        print(ligne_affichage)  # Affiche la ligne complète
-//        print("-------------")  # Affiche une bordure après la ligne
