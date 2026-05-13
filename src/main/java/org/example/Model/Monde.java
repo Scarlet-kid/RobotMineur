@@ -33,24 +33,32 @@ public class Monde {
 
         for (int ligne = 0; ligne < 10; ligne++) {
             for (int colonne = 0; colonne < 10; colonne++) {
-
-                grille[ligne][colonne] =
-                        new Secteur(ligne, colonne, false);
+                grille[ligne][colonne] = new Secteur(ligne, colonne, false);
             }
         }
+
+        // Cases d'eau
+        grille[0][1].setEstEau(true);
+        grille[0][2].setEstEau(true);
+
+        grille[1][1].setEstEau(true);
+        grille[1][2].setEstEau(true);
+
+        grille[6][6].setEstEau(true);
+        grille[6][7].setEstEau(true);
+
+        grille[7][6].setEstEau(true);
+        grille[7][7].setEstEau(true);
     }
 
     public void jouerTour() {
-
         tourActuel++;
-
         System.out.println("=== Tour " + tourActuel + " ===");
     }
 
     public void afficher() {
         System.out.println();
 
-        // 1. En-tête des colonnes (ajusté pour 7 espaces + 1 barre)
         System.out.print("    ");
         for (int j = 0; j < 10; j++) {
             System.out.print("   " + j + "    ");
@@ -60,19 +68,16 @@ public class Monde {
         dessinerLigneBordure();
 
         for (int i = 0; i < 10; i++) {
-            // 2. Ligne de données (Contenu)
+
             System.out.print(" " + i + " |");
             for (int j = 0; j < 10; j++) {
-                // On centre le symbole de 3 chars au milieu des 7 espaces
-                // Format : 2 espaces + 3 chars + 2 espaces = 7 total
-                System.out.print("  " + grille[i][j].afficher() + "  |");
+                System.out.print("  " + grille[i][j].getAffichageHaut() + "  |");
             }
             System.out.println();
 
-            // 3. Ligne de vide (Hauteur)
             System.out.print("   |");
             for (int j = 0; j < 10; j++) {
-                System.out.print("       |"); // Exactement 7 espaces
+                System.out.print("  " + grille[i][j].getAffichageBas() + "  |");
             }
             System.out.println();
 
@@ -83,7 +88,7 @@ public class Monde {
     private void dessinerLigneBordure() {
         System.out.print("   +");
         for (int j = 0; j < 10; j++) {
-            System.out.print("-------+"); // 7 tirets
+            System.out.print("-------+");
         }
         System.out.println();
     }

@@ -66,14 +66,26 @@ public class Secteur {
         return true;
     }
 
-    public String afficher() {
-        if (estEau) return " X ";
-        if (robot != null) return "R" + robot.getNumero() + (robot.getNumero() < 10 ? " " : "");
-        if (composante instanceof Mine) return "M" + composante.getNumero() + (composante.getNumero() < 10 ? " " : "");
+    public String getAffichageHaut() {
+
+        if (estEau) return "X X";
+
+        if (composante instanceof Mine)
+            return "M " + composante.getNumero();
+
         if (composante instanceof Entrepot)
-            return "E" + composante.getNumero() + (composante.getNumero() < 10 ? " " : "");
+            return "E " + composante.getNumero();
 
-        return "   "; // 3 espaces
+        return "   ";
+    }
 
+    public String getAffichageBas() {
+
+        if (estEau) return "X X";
+
+        if (robot != null)
+            return "R " + robot.getNumero();
+
+        return "   ";
     }
     }
