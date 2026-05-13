@@ -65,10 +65,7 @@ public class Secteur {
             return "E " + composante.getNumero();
 
         return "   ";
-<<<<<<< HEAD
     }
-=======
->>>>>>> 23faaedfed3b822b8939246c85f6884b3c821a13
 
     public String getAffichageBas() {
 
