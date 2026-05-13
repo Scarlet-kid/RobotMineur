@@ -26,16 +26,21 @@ public class Secteur {
         return estEau;
     }
 
-    public Robot getRobot() {
-        return robot;
+    public void setColonne(int colonne) {
+        this.colonne = colonne;
+    }
+
+    public void setLigne(int ligne) {
+        this.ligne = ligne;
     }
 
     public void setEstEau(boolean estEau) {
         this.estEau = estEau;
     }
 
-
-
+    public Robot getRobot(){
+        return robot;
+    }
 
     public void setRobot(Robot robot) {
         this.robot = robot;
@@ -48,7 +53,6 @@ public class Secteur {
     public void setComposante(Composantes composante) {
         this.composante = composante;
     }
-
     public boolean estLibre() {
 
         if (estEau) {
@@ -84,4 +88,16 @@ public class Secteur {
 
         return "   ";
     }
-}
+
+
+    public String afficher() {
+        if (estEau) return " X ";
+        if (robot != null) return "R" + robot.getNumero() + (robot.getNumero() < 10 ? " " : "");
+        if (composante instanceof Mine) return "M" + composante.getNumero() + (composante.getNumero() < 10 ? " " : "");
+        if (composante instanceof Entrepot)
+            return "E" + composante.getNumero() + (composante.getNumero() < 10 ? " " : "");
+
+        return "   "; // 3 espaces
+
+    }
+    }
