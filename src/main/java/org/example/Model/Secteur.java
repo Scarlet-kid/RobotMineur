@@ -73,6 +73,13 @@ public class Secteur {
         if (composante instanceof Entrepot) return "E" + composante.getNumero() + (composante.getNumero() < 10 ? " " : "");
 
         return "   "; // 3 espaces
+<<<<<<< HEAD
     }
+=======
+    }
+
+    }
+
+>>>>>>> a12a6367317a578840f1af69ae0a24732536a55b
 
 }
