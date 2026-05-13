@@ -18,14 +18,6 @@ public class Monde {
         return tourActuel;
     }
 
-    public void setGrille(Secteur[][] grille) {
-        this.grille = grille;
-    }
-
-    public void setTourActuel(int tourActuel) {
-        this.tourActuel = tourActuel;
-    }
-
     public void initialiser() {
 
         grille = new Secteur[10][10];
