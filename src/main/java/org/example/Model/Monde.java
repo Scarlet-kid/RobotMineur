@@ -50,41 +50,41 @@ public class Monde {
     public void afficher() {
         System.out.println();
 
-        System.out.print("     ");
+        // 1. En-tête des colonnes (ajusté pour 7 espaces + 1 barre)
+        System.out.print("    ");
         for (int j = 0; j < 10; j++) {
-            System.out.print(j + "    ");
+            System.out.print("   " + j + "    ");
         }
         System.out.println();
 
         dessinerLigneBordure();
 
         for (int i = 0; i < 10; i++) {
+            // 2. Ligne de données (Contenu)
             System.out.print(" " + i + " |");
             for (int j = 0; j < 10; j++) {
-                // Remplacer "  " par l'appel à votre méthode (ex: grille[i][j].getAffichageHaut())
-                System.out.print(" " + "  " + " |");
+                // On centre le symbole de 3 chars au milieu des 7 espaces
+                // Format : 2 espaces + 3 chars + 2 espaces = 7 total
+                System.out.print("  " + grille[i][j].afficher() + "  |");
             }
             System.out.println();
 
+            // 3. Ligne de vide (Hauteur)
             System.out.print("   |");
             for (int j = 0; j < 10; j++) {
-                // Remplacer "  " par l'appel à votre méthode (ex: grille[i][j].getAffichageBas())
-                System.out.print(" " + "  " + " |");
+                System.out.print("       |"); // Exactement 7 espaces
             }
             System.out.println();
 
             dessinerLigneBordure();
         }
-
-        System.out.println("\ntour\t" + tourActuel);
     }
 
     private void dessinerLigneBordure() {
         System.out.print("   +");
         for (int j = 0; j < 10; j++) {
-            System.out.print("----+");
+            System.out.print("-------+"); // 7 tirets
         }
         System.out.println();
     }
-
 }
