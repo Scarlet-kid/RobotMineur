@@ -26,6 +26,18 @@ public class Secteur {
         return estEau;
     }
 
+    public void setColonne(int colonne) {
+        this.colonne = colonne;
+    }
+
+    public void setLigne(int ligne) {
+        this.ligne = ligne;
+    }
+
+    public void setEstEau(boolean estEau) {
+        this.estEau = estEau;
+    }
+
     public Robot getRobot(){
         return robot;
     }
@@ -75,5 +87,17 @@ public class Secteur {
             return "R " + robot.getNumero();
 
         return "   ";
+    }
+
+
+    public String afficher() {
+        if (estEau) return " X ";
+        if (robot != null) return "R" + robot.getNumero() + (robot.getNumero() < 10 ? " " : "");
+        if (composante instanceof Mine) return "M" + composante.getNumero() + (composante.getNumero() < 10 ? " " : "");
+        if (composante instanceof Entrepot)
+            return "E" + composante.getNumero() + (composante.getNumero() < 10 ? " " : "");
+
+        return "   "; // 3 espaces
+
     }
     }
