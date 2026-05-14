@@ -29,18 +29,18 @@ public class Monde {
             }
         }
 
-        // Cases d'eau
-        grille[0][1].setEstEau(true);
-        grille[0][2].setEstEau(true);
+        int nbEau = 0;
+        java.util.Random rnd = new java.util.Random();
 
-        grille[1][1].setEstEau(true);
-        grille[1][2].setEstEau(true);
+        while (nbEau < 8) {
+            int ligne   = rnd.nextInt(10);
+            int colonne = rnd.nextInt(10);
 
-        grille[6][6].setEstEau(true);
-        grille[6][7].setEstEau(true);
-
-        grille[7][6].setEstEau(true);
-        grille[7][7].setEstEau(true);
+            if (!grille[ligne][colonne].isEstEau()) {
+                grille[ligne][colonne].setEstEau(true);
+                nbEau++;
+            }
+        }
     }
 
     public void jouerTour() {
