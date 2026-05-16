@@ -24,10 +24,6 @@ public class Mine extends Composantes {
         return nbMinerais == 0;
     }
 
-    public int getNbMinerais() {
-        return nbMinerais;
-    }
-
     public TypeMinerai getType() {
         return type;
     }

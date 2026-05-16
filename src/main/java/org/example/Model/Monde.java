@@ -15,12 +15,8 @@ public class Monde {
         this.tourActuel = tourActuel;
     }
 
-    public Monde() {
-    }
-
-    public Secteur[][] getGrille()      { return grille; }
-    public int getTourActuel()         { return tourActuel; }
-    public List<Robot> getRobots()     { return robots; }
+    public Secteur[][] getGrille()      { return this.grille; }
+    public int getTourActuel()         { return this.tourActuel; }
 
     public void initialiser() {
         grille = new Secteur[10][10];
@@ -35,24 +31,11 @@ public class Monde {
         while (nbEau < 8) {
             int ligne   = rnd.nextInt(10);
             int colonne = rnd.nextInt(10);
-            if (!grille[ligne][colonne].isEstEau()) {
+            if (!grille[ligne][colonne].EstEau()) {
                 grille[ligne][colonne].setEstEau(true);
                 nbEau++;
             }
         }
-    }
-
-    public void ajouterRobot(Robot robot, int ligne, int colonne) {
-        Secteur cible = grille[ligne][colonne];
-        if (cible.isEstEau()) {
-            throw new IllegalArgumentException("Impossible de placer le robot sur l’eau.");
-        }
-        if (cible.getRobot() != null) {
-            throw new IllegalArgumentException("Case déjà occupée par un autre robot.");
-        }
-        cible.setRobot(robot);
-        robot.setPosition(cible);
-        robots.add(robot);
     }
 
     public void jouerTour() {
@@ -65,7 +48,7 @@ public class Monde {
                 Scanner scanner = new Scanner(System.in);
                 System.out.print(
                         "Robot " + r.getNumero() + " – choisissez une direction (N/E/S/O) : ");
-                String line = scanner.nextLine().trim();
+                String line = scanner.nextLine().trim(); //.trim pour la supression des espaces au début et en fin de caractère.
 
                 if (line.isEmpty()) {
                     System.out.println("Entrée vide – réessayez.");

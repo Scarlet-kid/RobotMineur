@@ -1,7 +1,6 @@
 package org.example.Model;
 
 import java.util.Scanner;
-import org.example.Model.Directions;
 
 public class Robot extends Composantes {
 
@@ -53,7 +52,7 @@ public class Robot extends Composantes {
 
         Secteur cible = grille[nouvelleLigne][nouvelleColonne];
 
-        if (cible.isEstEau()) {
+        if (cible.EstEau()) {
             System.out.println("Action invalide : plan d’eau !");
             return false;
         }
@@ -105,7 +104,6 @@ public class Robot extends Composantes {
         return true;
     }
 
-    /** @return true si le robot a réellement déposé, false sinon */
     public boolean deposer() {
         Composantes c = secteur.getComposante();
 
@@ -158,7 +156,7 @@ public class Robot extends Composantes {
                     actionEffectuee = avancer(Directions.OUEST, grille);
                     break;
                 case 5:
-                    actionEffectuee = recolter();   // true → action acceptée, false → re‑demande
+                    actionEffectuee = recolter();
                     break;
                 case 6:
                     actionEffectuee = deposer();    // idem
@@ -175,12 +173,7 @@ public class Robot extends Composantes {
         }
     }
 
-    public TypeMinerai getType()            { return type; }
-    public int getNbMinerais()              { return nbMinerais; }
-    public int getCapaciteStockage()        { return capaciteStockage; }
-    public int getCapaciteExtraction()      { return capaciteExtraction; }
-    public int getNumero()                  { return numero; }
-    public void setPosition(Secteur secteur) { this.secteur = secteur; }
+    public int getNumero(){ return numero; }
 
     @Override
     public String afficher() {
