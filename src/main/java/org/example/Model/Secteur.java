@@ -1,5 +1,4 @@
 package org.example.Model;
-
 public class Secteur {
     private int ligne;
     private int colonne;
@@ -74,6 +73,5 @@ public class Secteur {
             return "E" + composante.getNumero() + (composante.getNumero() < 10 ? " " : "");
 
         return "   "; // 3 espaces
-
     }
     }
