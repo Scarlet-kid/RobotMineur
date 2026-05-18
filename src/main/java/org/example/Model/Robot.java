@@ -34,11 +34,14 @@ public class Robot extends Composantes {
         int nouvelleLigne   = ligne;
         int nouvelleColonne = colonne;
 
-        switch (dir) {
-            case NORD  -> nouvelleLigne--;
-            case SUD   -> nouvelleLigne++;
-            case EST   -> nouvelleColonne++;
-            case OUEST -> nouvelleColonne--;
+        if (dir == Directions.NORD) {
+            nouvelleLigne--;
+        } else if (dir == Directions.SUD) {
+            nouvelleLigne++;
+        } else if (dir == Directions.EST) {
+            nouvelleColonne++;
+        } else if (dir == Directions.OUEST) {
+            nouvelleColonne--;
         }
 
         int maxLignes = grille.length;
