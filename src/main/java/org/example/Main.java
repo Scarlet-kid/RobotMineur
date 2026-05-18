@@ -91,7 +91,7 @@ public class Main {
             int l = random.nextInt(10);
             int c = random.nextInt(10);
             s = grille[l][c];
-        } while (s.isEstEau() || s.getComposante() != null || s.getRobot() != null);
+        } while (s.EstEau() || s.getComposante() != null || s.getRobot() != null);
         return s;
     }
 
