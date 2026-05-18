@@ -85,12 +85,12 @@ public class Monde {
         for (int i = 0; i < 10; i++) {
             System.out.print(" " + i + " |");
             for (int j = 0; j < 10; j++) {
-                System.out.print("  " + grille[i][j].getAffichageHaut() + "  |");
+                System.out.print("  " + grille[i][j].getAffichageHaut() + "   |");
             }
             System.out.println();
             System.out.print("   |");
             for (int j = 0; j < 10; j++) {
-                System.out.print("  " + grille[i][j].getAffichageBas() + "  |");
+                System.out.print("  " + grille[i][j].getAffichageBas() + "   |");
             }
             System.out.println();
             dessinerLigneBordure();
