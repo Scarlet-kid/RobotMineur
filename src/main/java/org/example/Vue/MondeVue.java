@@ -13,6 +13,8 @@ import java.util.List;
 
 public class MondeVue extends BorderPane {
 
+    private static final int TAILLE_CASE = 72;
+
     private final Monde monde;
     private final CelluleVue[][] cellules = new CelluleVue[10][10];
 
@@ -27,7 +29,7 @@ public class MondeVue extends BorderPane {
     public MondeVue(Monde monde) {
         this.monde = monde;
 
-        setPadding(new Insets(10));
+        setPadding(new Insets(8));
         setStyle("-fx-background-color: #f5f5f5;");
 
         setCenter(creerGrille());
@@ -38,16 +40,23 @@ public class MondeVue extends BorderPane {
 
     private GridPane creerGrille() {
         GridPane grille = new GridPane();
-        grille.setHgap(2);
-        grille.setVgap(2);
+        grille.setHgap(0);
+        grille.setVgap(0);
+        grille.setMaxWidth(10 * TAILLE_CASE);
+        grille.setMaxHeight(10 * TAILLE_CASE);
 
         for (int i = 0; i < 10; i++) {
             ColumnConstraints col = new ColumnConstraints();
-            col.setPercentWidth(10);
-            grille.getColumnConstraints().add(col);
+            col.setPrefWidth(TAILLE_CASE);
+            col.setMinWidth(TAILLE_CASE);
+            col.setMaxWidth(TAILLE_CASE);
 
             RowConstraints row = new RowConstraints();
-            row.setPercentHeight(10);
+            row.setPrefHeight(TAILLE_CASE);
+            row.setMinHeight(TAILLE_CASE);
+            row.setMaxHeight(TAILLE_CASE);
+
+            grille.getColumnConstraints().add(col);
             grille.getRowConstraints().add(row);
         }
 
@@ -56,6 +65,11 @@ public class MondeVue extends BorderPane {
         for (int l = 0; l < 10; l++) {
             for (int c = 0; c < 10; c++) {
                 CelluleVue cellule = new CelluleVue(secteurs[l][c]);
+
+                cellule.setPrefSize(TAILLE_CASE, TAILLE_CASE);
+                cellule.setMinSize(TAILLE_CASE, TAILLE_CASE);
+                cellule.setMaxSize(TAILLE_CASE, TAILLE_CASE);
+
                 cellules[l][c] = cellule;
                 grille.add(cellule, c, l);
             }
@@ -67,7 +81,7 @@ public class MondeVue extends BorderPane {
     private VBox creerPanneau() {
         VBox box = new VBox(10);
         box.setPadding(new Insets(10));
-        box.setPrefWidth(300);
+        box.setPrefWidth(280);
         box.setStyle("-fx-background-color: white; -fx-border-color: #cccccc;");
 
         tourLabel.setStyle("-fx-font-size: 20; -fx-font-weight: bold;");
@@ -257,6 +271,7 @@ public class MondeVue extends BorderPane {
         panneauInfos.getChildren().clear();
 
         panneauInfos.getChildren().add(new Label("ROBOTS"));
+
         for (Robot r : recupererRobots()) {
             panneauInfos.getChildren().add(new Label(
                     "robot_" + typeRobot(r)

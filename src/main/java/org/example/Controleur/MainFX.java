@@ -32,7 +32,7 @@ public class MainFX extends Application {
 
         MondeVue vue = new MondeVue(monde);
 
-        Scene scene = new Scene(vue, 1000, 700);
+        Scene scene = new Scene(vue, 1050, 760);
         vue.ajouterControleClavier(scene);
 
         stage.setScene(scene);

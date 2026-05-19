@@ -7,28 +7,22 @@ import org.example.Model.*;
 
 public class CelluleVue extends StackPane {
 
+    private static final int TAILLE = 85;
+
     private final ImageView fond = new ImageView();
     private final ImageView objet = new ImageView();
     private final ImageView robot = new ImageView();
 
     public CelluleVue(Secteur secteur) {
-        setPrefSize(70, 70);
-
-        configurerImage(fond);
-        configurerImage(objet);
-        configurerImage(robot);
+        setMinSize(TAILLE, TAILLE);
+        setPrefSize(TAILLE, TAILLE);
+        setMaxSize(TAILLE, TAILLE);
 
         getChildren().addAll(fond, objet, robot);
 
         setStyle("-fx-border-color: #dddddd; -fx-border-width: 1;");
 
         rafraichir(secteur);
-    }
-
-    private void configurerImage(ImageView img) {
-        img.setPreserveRatio(false);
-        img.fitWidthProperty().bind(widthProperty());
-        img.fitHeightProperty().bind(heightProperty());
     }
 
     private Image charger(String nom) {
@@ -41,21 +35,33 @@ public class CelluleVue extends StackPane {
         return new Image(flux);
     }
 
+    private void imagePleineCase(ImageView image) {
+        image.setFitWidth(TAILLE);
+        image.setFitHeight(TAILLE);
+        image.setPreserveRatio(false);
+        image.setTranslateY(0);
+    }
+
+    private void imageMoitieHaute(ImageView image) {
+        image.setFitWidth(TAILLE);
+        image.setFitHeight(TAILLE / 2.0);
+        image.setPreserveRatio(false);
+        image.setTranslateY(-TAILLE / 4.0);
+    }
+
+    private void imageMoitieBasse(ImageView image) {
+        image.setFitWidth(TAILLE);
+        image.setFitHeight(TAILLE / 2.0);
+        image.setPreserveRatio(false);
+        image.setTranslateY(TAILLE / 4.0);
+    }
+
     public void rafraichir(Secteur secteur) {
         fond.setImage(charger("terrain.png"));
+        imagePleineCase(fond);
+
         objet.setImage(null);
         robot.setImage(null);
-
-        objet.fitWidthProperty().unbind();
-        objet.fitHeightProperty().unbind();
-        robot.fitWidthProperty().unbind();
-        robot.fitHeightProperty().unbind();
-
-        objet.setTranslateY(0);
-        robot.setTranslateY(0);
-
-        configurerImage(objet);
-        configurerImage(robot);
 
         if (secteur.EstEau()) {
             fond.setImage(charger("eau.png"));
@@ -70,42 +76,30 @@ public class CelluleVue extends StackPane {
 
         if (aComposante) {
             if (composante instanceof Mine mine) {
-                if (mine.getType() == TypeMinerai.OR) {
-                    objet.setImage(charger("mine_or.jpg"));
-                } else {
-                    objet.setImage(charger("mine_ni.png"));
-                }
+                objet.setImage(mine.getType() == TypeMinerai.OR
+                        ? charger("mine_or.jpg")
+                        : charger("mine_ni.png"));
             }
 
             if (composante instanceof Entrepot entrepot) {
-                if (entrepot.getType() == TypeMinerai.OR) {
-                    objet.setImage(charger("entrepot_or.jpg"));
-                } else {
-                    objet.setImage(charger("entrepot_ni.png"));
-                }
+                objet.setImage(entrepot.getType() == TypeMinerai.OR
+                        ? charger("entrepot_or.jpg")
+                        : charger("entrepot_ni.png"));
             }
         }
 
         if (aRobot) {
-            if (r.toString().contains("OR")) {
-                robot.setImage(charger("robot_or.png"));
-            } else {
-                robot.setImage(charger("robot_ni.png"));
-            }
+            robot.setImage(r.toString().contains("OR")
+                    ? charger("robot_or.png")
+                    : charger("robot_ni.png"));
         }
 
         if (aComposante && aRobot) {
-            objet.fitHeightProperty().unbind();
-            robot.fitHeightProperty().unbind();
-
-            objet.setFitHeight(getHeight() / 2);
-            robot.setFitHeight(getHeight() / 2);
-
-            objet.fitWidthProperty().bind(widthProperty());
-            robot.fitWidthProperty().bind(widthProperty());
-
-            objet.setTranslateY(-getHeight() / 4);
-            robot.setTranslateY(getHeight() / 4);
+            imageMoitieHaute(objet);
+            imageMoitieBasse(robot);
+        } else {
+            imagePleineCase(objet);
+            imagePleineCase(robot);
         }
     }
 }
