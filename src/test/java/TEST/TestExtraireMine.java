@@ -4,7 +4,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.example.Model.Mine;
-import org.example.Model.Robot;
 import org.example.Model.TypeMinerai;
 
 
@@ -14,7 +13,6 @@ public class TestExtraireMine {
 
     @BeforeEach
     void setUp() throws Exception {
-        // Initialisation par défaut avec ton constructeur à 4 paramètres
         mine = new Mine(1, null, TypeMinerai.OR, 50);
     }
 
