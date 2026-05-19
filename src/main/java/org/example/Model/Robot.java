@@ -73,7 +73,6 @@ public class Robot extends Composantes {
         return true;
     }
 
-    /** @return true si le robot a réellement récolté, false sinon */
     public boolean recolter() {
         Composantes c = secteur.getComposante();
 
@@ -162,7 +161,7 @@ public class Robot extends Composantes {
                     actionEffectuee = recolter();
                     break;
                 case 6:
-                    actionEffectuee = deposer();    // idem
+                    actionEffectuee = deposer();
                     break;
                 case 0:
                     System.out.println("Robot " + numero + " passe son tour.");
