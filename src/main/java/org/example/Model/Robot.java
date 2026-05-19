@@ -70,7 +70,6 @@ public class Robot extends Composantes {
         return true;
     }
 
-    /** @return true si le robot a réellement récolté, false sinon */
     public boolean recolter() {
         Composantes c = secteur.getComposante();
 
@@ -188,5 +187,17 @@ public class Robot extends Composantes {
                 + " " + secteur.getColonne()
                 + " " + typeStr
                 + " " + nbMinerais + " / " + capaciteStockage;
+    }
+
+    public TypeMinerai getType() {
+        return type;
+    }
+
+    public int getNbMinerais() {
+        return nbMinerais;
+    }
+
+    public int getCapaciteStockage() {
+        return capaciteStockage;
     }
 }

@@ -42,6 +42,14 @@ public class Mine extends Composantes {
                 + " " + typeStr
                 + " " + nbMinerais + " / " + capaciteInitiale;
     }
+
+    public int getNbMinerais() {
+        return nbMinerais;
+    }
+
+    public int getCapaciteInitiale() {
+        return capaciteInitiale;
+    }
 }
 
 
