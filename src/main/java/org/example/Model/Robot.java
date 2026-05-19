@@ -20,6 +20,10 @@ public class Robot extends Composantes {
         this.capaciteStockage = capaciteStockage;
         this.capaciteExtraction = capaciteExtraction;
     }
+    public void SetNbMineris(int nb)
+    {
+        this.nbMinerais = nb;
+    }
 
     public boolean avancer(Directions dir, Secteur[][] grille) {
 
