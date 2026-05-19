@@ -22,6 +22,7 @@ public class MondeVue extends BorderPane {
     private final VBox panneauInfos = new VBox(8);
 
     private int indexRobotCourant = 0;
+    private int nbActionsValidesDansTour = 0;
 
     public MondeVue(Monde monde) {
         this.monde = monde;
@@ -39,8 +40,6 @@ public class MondeVue extends BorderPane {
         GridPane grille = new GridPane();
         grille.setHgap(2);
         grille.setVgap(2);
-
-        grille.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         for (int i = 0; i < 10; i++) {
             ColumnConstraints col = new ColumnConstraints();
@@ -73,42 +72,28 @@ public class MondeVue extends BorderPane {
 
         tourLabel.setStyle("-fx-font-size: 20; -fx-font-weight: bold;");
         robotCourantLabel.setStyle("-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #243b6b;");
-
         messageLabel.setWrapText(true);
         messageLabel.setStyle("-fx-font-size: 13; -fx-font-weight: bold;");
 
-        Button nord = new Button("↑ Nord");
-        Button sud = new Button("↓ Sud");
-        Button est = new Button("→ Est");
-        Button ouest = new Button("← Ouest");
-        Button recolter = new Button("Récolter (R)");
-        Button deposer = new Button("Déposer (D)");
+        Label aide = new Label(
+                "COMMANDES CLAVIER\n\n" +
+                        "↑ : Nord\n" +
+                        "↓ : Sud\n" +
+                        "← : Ouest\n" +
+                        "→ : Est\n\n" +
+                        "R : Récolter\n" +
+                        "D : Déposer"
+        );
 
-        nord.setMaxWidth(Double.MAX_VALUE);
-        sud.setMaxWidth(Double.MAX_VALUE);
-        est.setMaxWidth(Double.MAX_VALUE);
-        ouest.setMaxWidth(Double.MAX_VALUE);
-        recolter.setMaxWidth(Double.MAX_VALUE);
-        deposer.setMaxWidth(Double.MAX_VALUE);
-
-        nord.setOnAction(e -> jouerDeplacement(Directions.NORD));
-        sud.setOnAction(e -> jouerDeplacement(Directions.SUD));
-        est.setOnAction(e -> jouerDeplacement(Directions.EST));
-        ouest.setOnAction(e -> jouerDeplacement(Directions.OUEST));
-        recolter.setOnAction(e -> jouerRecolter());
-        deposer.setOnAction(e -> jouerDeposer());
+        aide.setWrapText(true);
+        aide.setStyle("-fx-font-size: 13; -fx-text-fill: #444444;");
 
         box.getChildren().addAll(
                 tourLabel,
                 robotCourantLabel,
                 messageLabel,
                 new Separator(),
-                nord,
-                sud,
-                est,
-                ouest,
-                recolter,
-                deposer,
+                aide,
                 new Separator(),
                 panneauInfos
         );
@@ -122,6 +107,7 @@ public class MondeVue extends BorderPane {
         for (int l = 0; l < 10; l++) {
             for (int c = 0; c < 10; c++) {
                 Robot r = monde.getGrille()[l][c].getRobot();
+
                 if (r != null) {
                     robots.add(r);
                 }
@@ -149,9 +135,18 @@ public class MondeVue extends BorderPane {
     private void passerAuRobotSuivant() {
         List<Robot> robots = recupererRobots();
 
-        if (!robots.isEmpty()) {
-            indexRobotCourant = (indexRobotCourant + 1) % robots.size();
+        if (robots.isEmpty()) {
+            return;
         }
+
+        nbActionsValidesDansTour++;
+
+        if (nbActionsValidesDansTour >= robots.size()) {
+            monde.jouerTour();
+            nbActionsValidesDansTour = 0;
+        }
+
+        indexRobotCourant = (indexRobotCourant + 1) % robots.size();
     }
 
     private void jouerDeplacement(Directions direction) {
@@ -165,11 +160,10 @@ public class MondeVue extends BorderPane {
         boolean ok = robot.avancer(direction, monde.getGrille());
 
         if (ok) {
-            monde.jouerTour();
             passerAuRobotSuivant();
-            afficherMessage("Action réussie.", true);
+            afficherMessage("Déplacement réussi. Robot suivant.", true);
         } else {
-            afficherMessage("Action invalide : déplacement impossible.", false);
+            afficherMessage("Action invalide : déplacement impossible. Le même robot doit rejouer.", false);
         }
 
         rafraichir();
@@ -186,11 +180,10 @@ public class MondeVue extends BorderPane {
         boolean ok = robot.recolter();
 
         if (ok) {
-            monde.jouerTour();
             passerAuRobotSuivant();
-            afficherMessage("Récolte réussie.", true);
+            afficherMessage("Récolte réussie. Robot suivant.", true);
         } else {
-            afficherMessage("Action invalide : récolte impossible.", false);
+            afficherMessage("Action invalide : récolte impossible. Le même robot doit rejouer.", false);
         }
 
         rafraichir();
@@ -207,11 +200,10 @@ public class MondeVue extends BorderPane {
         boolean ok = robot.deposer();
 
         if (ok) {
-            monde.jouerTour();
             passerAuRobotSuivant();
-            afficherMessage("Dépôt réussi.", true);
+            afficherMessage("Dépôt réussi. Robot suivant.", true);
         } else {
-            afficherMessage("Action invalide : dépôt impossible.", false);
+            afficherMessage("Action invalide : dépôt impossible. Le même robot doit rejouer.", false);
         }
 
         rafraichir();
@@ -249,6 +241,7 @@ public class MondeVue extends BorderPane {
         tourLabel.setText("Tour : " + monde.getTourActuel());
 
         Robot courant = getRobotCourant();
+
         if (courant != null) {
             robotCourantLabel.setText("À jouer : R" + courant.getNumero());
         } else {
@@ -281,10 +274,13 @@ public class MondeVue extends BorderPane {
 
                 if (comp instanceof Entrepot entrepot) {
                     String typeStr = entrepot.getType() == TypeMinerai.OR ? "OR" : "NI";
+
                     panneauInfos.getChildren().add(new Label(
                             "E" + entrepot.getNumero()
-                                    + " " + typeStr
-                                    + " stock : " + entrepot.getStock()
+                                    + " "
+                                    + typeStr
+                                    + " stock : "
+                                    + entrepot.getStock()
                     ));
                 }
             }
