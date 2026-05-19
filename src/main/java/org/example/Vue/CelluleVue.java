@@ -1,10 +1,8 @@
 package org.example.Vue;
 
-import javafx.geometry.Pos;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.StackPane;
 import org.example.Model.*;
 
 public class CelluleVue extends StackPane {
@@ -12,22 +10,18 @@ public class CelluleVue extends StackPane {
     private final ImageView fond = new ImageView();
     private final ImageView objet = new ImageView();
     private final ImageView robot = new ImageView();
-    private final Label texte = new Label();
 
     public CelluleVue(Secteur secteur) {
-        setMinSize(70, 70);
         setPrefSize(70, 70);
 
         configurerImage(fond);
         configurerImage(objet);
         configurerImage(robot);
 
-        texte.setStyle("-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: black;");
-        StackPane.setAlignment(texte, Pos.BOTTOM_CENTER);
+        getChildren().addAll(fond, objet, robot);
 
-        getChildren().addAll(fond, objet, robot, texte);
+        setStyle("-fx-border-color: #dddddd; -fx-border-width: 1;");
 
-        setStyle("-fx-border-color: #999999; -fx-border-width: 1;");
         rafraichir(secteur);
     }
 
@@ -41,8 +35,7 @@ public class CelluleVue extends StackPane {
         var flux = getClass().getResourceAsStream("/images/" + nom);
 
         if (flux == null) {
-            System.out.println("Image introuvable : /images/" + nom);
-            return null;
+            throw new RuntimeException("Image introuvable : /images/" + nom);
         }
 
         return new Image(flux);
@@ -52,7 +45,6 @@ public class CelluleVue extends StackPane {
         fond.setImage(charger("terrain.png"));
         objet.setImage(null);
         robot.setImage(null);
-        texte.setText("");
 
         objet.fitWidthProperty().unbind();
         objet.fitHeightProperty().unbind();
@@ -83,7 +75,6 @@ public class CelluleVue extends StackPane {
                 } else {
                     objet.setImage(charger("mine_ni.png"));
                 }
-                texte.setText("M" + mine.getNumero());
             }
 
             if (composante instanceof Entrepot entrepot) {
@@ -92,7 +83,6 @@ public class CelluleVue extends StackPane {
                 } else {
                     objet.setImage(charger("entrepot_ni.png"));
                 }
-                texte.setText("E" + entrepot.getNumero());
             }
         }
 
@@ -102,19 +92,20 @@ public class CelluleVue extends StackPane {
             } else {
                 robot.setImage(charger("robot_ni.png"));
             }
-
-            texte.setText(texte.getText() + " R" + r.getNumero());
         }
 
         if (aComposante && aRobot) {
             objet.fitHeightProperty().unbind();
             robot.fitHeightProperty().unbind();
 
-            objet.setFitHeight(35);
-            robot.setFitHeight(35);
+            objet.setFitHeight(getHeight() / 2);
+            robot.setFitHeight(getHeight() / 2);
 
-            objet.setTranslateY(-17);
-            robot.setTranslateY(17);
+            objet.fitWidthProperty().bind(widthProperty());
+            robot.fitWidthProperty().bind(widthProperty());
+
+            objet.setTranslateY(-getHeight() / 4);
+            robot.setTranslateY(getHeight() / 4);
         }
     }
 }

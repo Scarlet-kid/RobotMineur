@@ -67,7 +67,7 @@ public class MondeVue extends BorderPane {
     private VBox creerPanneau() {
         VBox box = new VBox(10);
         box.setPadding(new Insets(10));
-        box.setPrefWidth(280);
+        box.setPrefWidth(300);
         box.setStyle("-fx-background-color: white; -fx-border-color: #cccccc;");
 
         tourLabel.setStyle("-fx-font-size: 20; -fx-font-weight: bold;");
@@ -243,7 +243,7 @@ public class MondeVue extends BorderPane {
         Robot courant = getRobotCourant();
 
         if (courant != null) {
-            robotCourantLabel.setText("À jouer : R" + courant.getNumero());
+            robotCourantLabel.setText("À jouer : robot_" + typeRobot(courant));
         } else {
             robotCourantLabel.setText("Aucun robot");
         }
@@ -258,7 +258,13 @@ public class MondeVue extends BorderPane {
 
         panneauInfos.getChildren().add(new Label("ROBOTS"));
         for (Robot r : recupererRobots()) {
-            panneauInfos.getChildren().add(new Label(r.toString()));
+            panneauInfos.getChildren().add(new Label(
+                    "robot_" + typeRobot(r)
+                            + " : "
+                            + r.getSecteur().getLigne()
+                            + ","
+                            + r.getSecteur().getColonne()
+            ));
         }
 
         panneauInfos.getChildren().add(new Separator());
@@ -269,21 +275,28 @@ public class MondeVue extends BorderPane {
                 Composantes comp = monde.getGrille()[l][c].getComposante();
 
                 if (comp instanceof Mine mine) {
-                    panneauInfos.getChildren().add(new Label(mine.toString()));
+                    String nom = mine.getType() == TypeMinerai.OR ? "mine_or" : "mine_nickel";
+
+                    panneauInfos.getChildren().add(new Label(
+                            nom + " : "
+                                    + mine.getSecteur().getLigne()
+                                    + ","
+                                    + mine.getSecteur().getColonne()
+                    ));
                 }
 
                 if (comp instanceof Entrepot entrepot) {
-                    String typeStr = entrepot.getType() == TypeMinerai.OR ? "OR" : "NI";
+                    String nom = entrepot.getType() == TypeMinerai.OR ? "entrepot_or" : "entrepot_nickel";
 
                     panneauInfos.getChildren().add(new Label(
-                            "E" + entrepot.getNumero()
-                                    + " "
-                                    + typeStr
-                                    + " stock : "
-                                    + entrepot.getStock()
+                            nom + " stock : " + entrepot.getStock()
                     ));
                 }
             }
         }
+    }
+
+    private String typeRobot(Robot r) {
+        return r.toString().contains("OR") ? "or" : "nickel";
     }
 }
