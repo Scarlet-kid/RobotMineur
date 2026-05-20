@@ -20,6 +20,10 @@ public class Robot extends Composantes {
         this.capaciteStockage = capaciteStockage;
         this.capaciteExtraction = capaciteExtraction;
     }
+    public void SetNbMineris(int nb)
+    {
+        this.nbMinerais = nb;
+    }
 
     public boolean avancer(Directions dir, Secteur[][] grille) {
 
@@ -34,11 +38,14 @@ public class Robot extends Composantes {
         int nouvelleLigne   = ligne;
         int nouvelleColonne = colonne;
 
-        switch (dir) {
-            case NORD  -> nouvelleLigne--;
-            case SUD   -> nouvelleLigne++;
-            case EST   -> nouvelleColonne++;
-            case OUEST -> nouvelleColonne--;
+        if (dir == Directions.NORD) {
+            nouvelleLigne--;
+        } else if (dir == Directions.SUD) {
+            nouvelleLigne++;
+        } else if (dir == Directions.EST) {
+            nouvelleColonne++;
+        } else if (dir == Directions.OUEST) {
+            nouvelleColonne--;
         }
 
         int maxLignes = grille.length;
@@ -70,7 +77,6 @@ public class Robot extends Composantes {
         return true;
     }
 
-    /** @return true si le robot a réellement récolté, false sinon */
     public boolean recolter() {
         Composantes c = secteur.getComposante();
 
@@ -159,7 +165,7 @@ public class Robot extends Composantes {
                     actionEffectuee = recolter();
                     break;
                 case 6:
-                    actionEffectuee = deposer();    // idem
+                    actionEffectuee = deposer();
                     break;
                 case 0:
                     System.out.println("Robot " + numero + " passe son tour.");
