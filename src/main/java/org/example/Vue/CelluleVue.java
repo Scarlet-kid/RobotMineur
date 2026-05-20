@@ -8,15 +8,14 @@ import org.example.Model.*;
 
 public class CelluleVue extends StackPane {
 
-    private static final int TAILLE = 70;
     private final Secteur secteur;
 
     public CelluleVue(Secteur secteur) {
         this.secteur = secteur;
 
-        setPrefSize(TAILLE, TAILLE);
-        setMinSize(TAILLE, TAILLE);
-        setMaxSize(TAILLE, TAILLE);
+        // LA LIGNE VITALE : autorise la case à rétrécir pour s'adapter à l'écran
+        // Sans ça, l'image fait exploser la grille !
+        setMinSize(0, 0);
 
         rafraichir();
     }
@@ -27,8 +26,7 @@ public class CelluleVue extends StackPane {
         ImageView fond = new ImageView(
                 secteur.EstEau() ? charger("eau.png") : charger("terrain.png")
         );
-
-        reglerImage(fond, TAILLE, TAILLE);
+        reglerImage(fond);
         getChildren().add(fond);
 
         Composantes composante = secteur.getComposante();
@@ -39,8 +37,7 @@ public class CelluleVue extends StackPane {
                             ? charger("mine_or.png")
                             : charger("mine_ni.png")
             );
-
-            reglerImage(mineVue, TAILLE, TAILLE);
+            reglerImage(mineVue);
             getChildren().add(mineVue);
         }
 
@@ -50,8 +47,7 @@ public class CelluleVue extends StackPane {
                             ? charger("entrepot_or.jpg")
                             : charger("entrepot_ni.png")
             );
-
-            reglerImage(entrepotVue, TAILLE, TAILLE);
+            reglerImage(entrepotVue);
             getChildren().add(entrepotVue);
         }
 
@@ -63,28 +59,25 @@ public class CelluleVue extends StackPane {
                             ? charger("robot_or.png")
                             : charger("robot_ni.png")
             );
-
-            reglerImage(robotVue, TAILLE, TAILLE);
+            reglerImage(robotVue);
             StackPane.setAlignment(robotVue, Pos.CENTER);
-
             getChildren().add(robotVue);
         }
     }
 
-    private void reglerImage(ImageView imageView, int largeur, int hauteur) {
-        imageView.setFitWidth(largeur);
-        imageView.setFitHeight(hauteur);
+    private void reglerImage(ImageView imageView) {
+        // L'image colle aux bords de la case
+        imageView.fitWidthProperty().bind(this.widthProperty());
+        imageView.fitHeightProperty().bind(this.heightProperty());
         imageView.setPreserveRatio(false);
         imageView.setSmooth(true);
     }
 
     private Image charger(String nom) {
         var flux = getClass().getResourceAsStream("/images/" + nom);
-
         if (flux == null) {
             throw new RuntimeException("Image introuvable : /images/" + nom);
         }
-
         return new Image(flux);
     }
 }

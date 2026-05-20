@@ -30,15 +30,15 @@ public class MondeVue extends BorderPane {
     public MondeVue(Monde monde) {
         this.monde = monde;
 
-        setStyle("-fx-background-color: #e9e9e9;");
+        setStyle("-fx-background-color: #111111;"); // Fond sombre au cas où
 
         grille.setHgap(0);
         grille.setVgap(0);
-        grille.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         creerGrille();
 
         VBox panneau = creerPanneau();
+        // BLINDAGE DU PANNEAU : Il fera 430px, peu importe ce que fait la grille !
         panneau.setPrefWidth(430);
         panneau.setMinWidth(430);
         panneau.setMaxWidth(430);
@@ -54,18 +54,14 @@ public class MondeVue extends BorderPane {
         grille.getColumnConstraints().clear();
         grille.getRowConstraints().clear();
 
+        // On remet la division parfaite : 10 colonnes de 10%
         for (int i = 0; i < 10; i++) {
             ColumnConstraints colonne = new ColumnConstraints();
             colonne.setPercentWidth(10);
-            colonne.setHgrow(Priority.ALWAYS);
-            colonne.setFillWidth(true);
+            grille.getColumnConstraints().add(colonne);
 
             RowConstraints ligne = new RowConstraints();
             ligne.setPercentHeight(10);
-            ligne.setVgrow(Priority.ALWAYS);
-            ligne.setFillHeight(true);
-
-            grille.getColumnConstraints().add(colonne);
             grille.getRowConstraints().add(ligne);
         }
 
@@ -74,11 +70,6 @@ public class MondeVue extends BorderPane {
         for (int ligne = 0; ligne < 10; ligne++) {
             for (int colonne = 0; colonne < 10; colonne++) {
                 CelluleVue cellule = new CelluleVue(secteurs[ligne][colonne]);
-                cellule.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-
-                GridPane.setHgrow(cellule, Priority.ALWAYS);
-                GridPane.setVgrow(cellule, Priority.ALWAYS);
-
                 grille.add(cellule, colonne, ligne);
             }
         }
