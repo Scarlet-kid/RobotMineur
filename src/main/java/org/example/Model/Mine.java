@@ -41,7 +41,12 @@ public class Mine extends Composantes {
 
     @Override
     public String toString() {
-        String typeStr = (type == TypeMinerai.OR) ? "OR" : "NI";
+        String typeStr;
+        if (type == TypeMinerai.OR) {
+            typeStr = "OR";
+        } else {
+            typeStr = "NI";
+        }
         return "M" + getNumero()
                 + " " + getSecteur().getLigne()
                 + " " + getSecteur().getColonne()
