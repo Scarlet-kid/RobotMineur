@@ -1,9 +1,11 @@
 package org.example.Vue;
 
 import javafx.geometry.Pos;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.util.Duration;
 import org.example.Model.*;
 
 public class CelluleVue extends StackPane {
@@ -12,17 +14,14 @@ public class CelluleVue extends StackPane {
 
     public CelluleVue(Secteur secteur) {
         this.secteur = secteur;
-
-        // LA LIGNE VITALE : autorise la case à rétrécir pour s'adapter à l'écran
-        // Sans ça, l'image fait exploser la grille !
         setMinSize(0, 0);
-
         rafraichir();
     }
 
     public void rafraichir() {
         getChildren().clear();
 
+        // Fond
         ImageView fond = new ImageView(
                 secteur.EstEau() ? charger("eau.png") : charger("terrain.png")
         );
@@ -30,7 +29,9 @@ public class CelluleVue extends StackPane {
         getChildren().add(fond);
 
         Composantes composante = secteur.getComposante();
+        String infoTooltip = secteur.EstEau() ? "Eau (Infranchissable)" : "Plaine";
 
+        // Mines
         if (composante instanceof Mine mine) {
             ImageView mineVue = new ImageView(
                     mine.getType() == TypeMinerai.OR
@@ -39,8 +40,10 @@ public class CelluleVue extends StackPane {
             );
             reglerImage(mineVue);
             getChildren().add(mineVue);
+            infoTooltip = "Mine " + mine.getType() + "\nReste : " + mine.getNbMinerais();
         }
 
+        // Entrepôts
         if (composante instanceof Entrepot entrepot) {
             ImageView entrepotVue = new ImageView(
                     entrepot.getType() == TypeMinerai.OR
@@ -49,10 +52,12 @@ public class CelluleVue extends StackPane {
             );
             reglerImage(entrepotVue);
             getChildren().add(entrepotVue);
+            infoTooltip = "Entrepôt " + entrepot.getType() + "\nStock : " + entrepot.getStock();
         }
 
         Robot robot = secteur.getRobot();
 
+        // Robots
         if (robot != null) {
             ImageView robotVue = new ImageView(
                     robot.getType() == TypeMinerai.OR
@@ -62,11 +67,17 @@ public class CelluleVue extends StackPane {
             reglerImage(robotVue);
             StackPane.setAlignment(robotVue, Pos.CENTER);
             getChildren().add(robotVue);
+            infoTooltip = "Robot " + robot.getType() + "\nTransporte : " + robot.getNbMinerais();
         }
+
+        // CRITÈRE BASTIEN & SCAPIN : Guidage (Information immédiate)
+        Tooltip tooltip = new Tooltip(infoTooltip);
+        tooltip.setShowDelay(Duration.millis(200)); // S'affiche rapidement
+        tooltip.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        Tooltip.install(this, tooltip);
     }
 
     private void reglerImage(ImageView imageView) {
-        // L'image colle aux bords de la case
         imageView.fitWidthProperty().bind(this.widthProperty());
         imageView.fitHeightProperty().bind(this.heightProperty());
         imageView.setPreserveRatio(false);
