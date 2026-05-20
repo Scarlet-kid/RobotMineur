@@ -59,7 +59,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>org.example.Main</mainClass>
+                    <mainClass>org.example.Model.Main</mainClass>
                 </configuration>
             </plugin>
 
@@ -75,7 +75,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>org.example.Main</mainClass>
+                            <mainClass>org.example.Model.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -95,7 +95,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>org.example.Main</mainClass>
+                    <mainClass>org.example.Model.Main</mainClass>
                 </configuration>
             </plugin>
 

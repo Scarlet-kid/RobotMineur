@@ -1,6 +1,4 @@
-package org.example;
-
-import org.example.Model.*;
+package org.example.Model;
 
 import java.util.ArrayList;
 import java.util.List;
