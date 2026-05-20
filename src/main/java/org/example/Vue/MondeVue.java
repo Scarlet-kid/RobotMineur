@@ -16,7 +16,6 @@ import java.util.List;
 public class MondeVue extends BorderPane {
 
     private final Monde monde;
-
     private final GridPane grille = new GridPane();
 
     private final Label tourLabel = new Label();
@@ -30,44 +29,44 @@ public class MondeVue extends BorderPane {
     private int actionsTour = 0;
 
     public MondeVue(Monde monde) {
-
         this.monde = monde;
 
         setStyle("-fx-background-color: #e9e9e9;");
 
         grille.setHgap(0);
         grille.setVgap(0);
+        grille.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         creerGrille();
 
         VBox panneau = creerPanneau();
-
         panneau.setPrefWidth(320);
+        panneau.setMinWidth(320);
+        panneau.setMaxWidth(320);
 
         setCenter(grille);
         setRight(panneau);
 
         BorderPane.setMargin(grille, Insets.EMPTY);
 
-        grille.prefWidthProperty().bind(widthProperty().subtract(320));
-        grille.prefHeightProperty().bind(heightProperty());
-
         rafraichirInfos();
     }
 
     private void creerGrille() {
-
         grille.getChildren().clear();
         grille.getColumnConstraints().clear();
         grille.getRowConstraints().clear();
 
         for (int i = 0; i < 10; i++) {
-
             ColumnConstraints colonne = new ColumnConstraints();
             colonne.setPercentWidth(10);
+            colonne.setHgrow(Priority.ALWAYS);
+            colonne.setFillWidth(true);
 
             RowConstraints ligne = new RowConstraints();
             ligne.setPercentHeight(10);
+            ligne.setVgrow(Priority.ALWAYS);
+            ligne.setFillHeight(true);
 
             grille.getColumnConstraints().add(colonne);
             grille.getRowConstraints().add(ligne);
@@ -76,11 +75,8 @@ public class MondeVue extends BorderPane {
         Secteur[][] secteurs = monde.getGrille();
 
         for (int ligne = 0; ligne < 10; ligne++) {
-
             for (int colonne = 0; colonne < 10; colonne++) {
-
-                CelluleVue cellule =
-                        new CelluleVue(secteurs[ligne][colonne]);
+                CelluleVue cellule = new CelluleVue(secteurs[ligne][colonne]);
 
                 cellule.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
@@ -93,11 +89,9 @@ public class MondeVue extends BorderPane {
     }
 
     private VBox creerPanneau() {
-
         VBox panneau = new VBox(12);
 
         panneau.setPadding(new Insets(15));
-
         panneau.setStyle("""
                 -fx-background-color: white;
                 -fx-border-color: #cccccc;
@@ -144,15 +138,11 @@ public class MondeVue extends BorderPane {
     }
 
     private List<Robot> recupererRobots() {
-
         List<Robot> robots = new ArrayList<>();
 
         for (int ligne = 0; ligne < 10; ligne++) {
-
             for (int colonne = 0; colonne < 10; colonne++) {
-
-                Robot robot =
-                        monde.getGrille()[ligne][colonne].getRobot();
+                Robot robot = monde.getGrille()[ligne][colonne].getRobot();
 
                 if (robot != null) {
                     robots.add(robot);
@@ -161,12 +151,10 @@ public class MondeVue extends BorderPane {
         }
 
         robots.sort(Comparator.comparingInt(Robot::getNumero));
-
         return robots;
     }
 
     private Robot getRobotActuel() {
-
         List<Robot> robots = recupererRobots();
 
         if (robots.isEmpty()) {
@@ -181,9 +169,7 @@ public class MondeVue extends BorderPane {
     }
 
     public void ajouterControleClavier(Scene scene) {
-
         scene.setOnKeyPressed(event -> {
-
             Robot robot = getRobotActuel();
 
             if (robot == null) {
@@ -193,39 +179,25 @@ public class MondeVue extends BorderPane {
             boolean actionValide = false;
 
             if (event.getCode() == KeyCode.UP) {
-                actionValide =
-                        robot.avancer(Directions.NORD, monde.getGrille());
-            }
-
-            else if (event.getCode() == KeyCode.DOWN) {
-                actionValide =
-                        robot.avancer(Directions.SUD, monde.getGrille());
-            }
-
-            else if (event.getCode() == KeyCode.LEFT) {
-                actionValide =
-                        robot.avancer(Directions.OUEST, monde.getGrille());
-            }
-
-            else if (event.getCode() == KeyCode.RIGHT) {
-                actionValide =
-                        robot.avancer(Directions.EST, monde.getGrille());
-            }
-
-            else if (event.getCode() == KeyCode.R) {
+                actionValide = robot.avancer(Directions.NORD, monde.getGrille());
+            } else if (event.getCode() == KeyCode.DOWN) {
+                actionValide = robot.avancer(Directions.SUD, monde.getGrille());
+            } else if (event.getCode() == KeyCode.LEFT) {
+                actionValide = robot.avancer(Directions.OUEST, monde.getGrille());
+            } else if (event.getCode() == KeyCode.RIGHT) {
+                actionValide = robot.avancer(Directions.EST, monde.getGrille());
+            } else if (event.getCode() == KeyCode.R) {
                 actionValide = robot.recolter();
-            }
-
-            else if (event.getCode() == KeyCode.D) {
+            } else if (event.getCode() == KeyCode.D) {
                 actionValide = robot.deposer();
+            } else {
+                return;
             }
 
             if (actionValide) {
-
                 actionsTour++;
 
                 if (actionsTour >= recupererRobots().size()) {
-
                     monde.jouerTour();
                     actionsTour = 0;
                 }
@@ -238,10 +210,7 @@ public class MondeVue extends BorderPane {
 
                 messageLabel.setTextFill(Color.GREEN);
                 messageLabel.setText("Action réussie");
-            }
-
-            else {
-
+            } else {
                 messageLabel.setTextFill(Color.RED);
                 messageLabel.setText("Action invalide");
             }
@@ -251,43 +220,27 @@ public class MondeVue extends BorderPane {
     }
 
     private void rafraichir() {
-
         creerGrille();
         rafraichirInfos();
     }
 
     private void rafraichirInfos() {
-
         tourLabel.setText("Tour : " + monde.getTourActuel());
 
         Robot robot = getRobotActuel();
 
         if (robot == null) {
             robotActuelLabel.setText("Aucun robot");
-        }
-
-        else {
-
-            if (robot.getType() == TypeMinerai.OR) {
-                robotActuelLabel.setText("À jouer : robot_or");
-            }
-            else {
-                robotActuelLabel.setText("À jouer : robot_nickel");
-            }
+        } else if (robot.getType() == TypeMinerai.OR) {
+            robotActuelLabel.setText("À jouer : robot_or");
+        } else {
+            robotActuelLabel.setText("À jouer : robot_nickel");
         }
 
         StringBuilder robots = new StringBuilder("ROBOTS\n\n");
 
         for (Robot r : recupererRobots()) {
-
-            String nom;
-
-            if (r.getType() == TypeMinerai.OR) {
-                nom = "robot_or";
-            }
-            else {
-                nom = "robot_nickel";
-            }
+            String nom = r.getType() == TypeMinerai.OR ? "robot_or" : "robot_nickel";
 
             robots.append(nom)
                     .append(" : ")
@@ -299,27 +252,17 @@ public class MondeVue extends BorderPane {
 
         robotsLabel.setText(robots.toString());
 
-        StringBuilder composants =
-                new StringBuilder("COMPOSANTS\n\n");
+        StringBuilder composants = new StringBuilder("COMPOSANTS\n\n");
 
         for (int ligne = 0; ligne < 10; ligne++) {
-
             for (int colonne = 0; colonne < 10; colonne++) {
-
-                Composantes composante =
-                        monde.getGrille()[ligne][colonne]
-                                .getComposante();
+                Composantes composante = monde.getGrille()[ligne][colonne].getComposante();
 
                 if (composante instanceof Mine mine) {
+                    String nom = mine.getType() == TypeMinerai.OR ? "mine_or" : "mine_nickel";
 
-                    if (mine.getType() == TypeMinerai.OR) {
-                        composants.append("mine_or");
-                    }
-                    else {
-                        composants.append("mine_nickel");
-                    }
-
-                    composants.append(" : ")
+                    composants.append(nom)
+                            .append(" : ")
                             .append(ligne)
                             .append(",")
                             .append(colonne)
@@ -327,15 +270,10 @@ public class MondeVue extends BorderPane {
                 }
 
                 if (composante instanceof Entrepot entrepot) {
+                    String nom = entrepot.getType() == TypeMinerai.OR ? "entrepot_or" : "entrepot_nickel";
 
-                    if (entrepot.getType() == TypeMinerai.OR) {
-                        composants.append("entrepot_or");
-                    }
-                    else {
-                        composants.append("entrepot_nickel");
-                    }
-
-                    composants.append(" stock : ")
+                    composants.append(nom)
+                            .append(" stock : ")
                             .append(entrepot.getStock())
                             .append("\n");
                 }

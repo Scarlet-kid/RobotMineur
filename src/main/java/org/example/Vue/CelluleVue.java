@@ -14,51 +14,38 @@ public class CelluleVue extends StackPane {
     private final ImageView robot = new ImageView();
 
     public CelluleVue(Secteur secteur) {
-
         setPrefSize(TAILLE, TAILLE);
         setMinSize(TAILLE, TAILLE);
-        setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        setMaxSize(TAILLE, TAILLE);
 
-        configurer(fond);
-        configurer(composant);
-        configurer(robot);
+        configurerImage(fond);
+        configurerImage(composant);
+        configurerImage(robot);
 
         getChildren().addAll(fond, composant, robot);
 
-        setStyle("-fx-border-color: #d0d0d0; -fx-border-width: 0.5;");
+        setStyle("-fx-border-color: #cccccc; -fx-border-width: 0.5;");
 
         rafraichir(secteur);
     }
 
-    private void configurer(ImageView img) {
-
-        img.setFitWidth(TAILLE);
-        img.setFitHeight(TAILLE);
-
-        img.setPreserveRatio(false);
-        img.setSmooth(true);
+    private void configurerImage(ImageView image) {
+        image.setFitWidth(TAILLE);
+        image.setFitHeight(TAILLE);
+        image.setPreserveRatio(false);
+        image.setSmooth(true);
     }
 
     private Image charger(String nom) {
-
-        var flux = getClass().getResourceAsStream("/images/" + nom);
-
-        if (flux == null) {
-            throw new RuntimeException("Image introuvable : " + nom);
-        }
-
-        return new Image(flux);
+        return new Image(getClass().getResourceAsStream("/images/" + nom));
     }
 
     public void rafraichir(Secteur secteur) {
-
         fond.setImage(charger("terrain.png"));
-
         composant.setImage(null);
         robot.setImage(null);
 
         if (secteur.EstEau()) {
-
             fond.setImage(charger("eau.png"));
             return;
         }
@@ -66,21 +53,17 @@ public class CelluleVue extends StackPane {
         Composantes c = secteur.getComposante();
 
         if (c instanceof Mine mine) {
-
             if (mine.getType() == TypeMinerai.OR) {
                 composant.setImage(charger("mine_or.jpg"));
-            }
-            else {
+            } else {
                 composant.setImage(charger("mine_ni.png"));
             }
         }
 
         if (c instanceof Entrepot entrepot) {
-
             if (entrepot.getType() == TypeMinerai.OR) {
                 composant.setImage(charger("entrepot_or.jpg"));
-            }
-            else {
+            } else {
                 composant.setImage(charger("entrepot_ni.png"));
             }
         }
@@ -88,11 +71,9 @@ public class CelluleVue extends StackPane {
         Robot r = secteur.getRobot();
 
         if (r != null) {
-
             if (r.getType() == TypeMinerai.OR) {
                 robot.setImage(charger("robot_or.png"));
-            }
-            else {
+            } else {
                 robot.setImage(charger("robot_ni.png"));
             }
         }
