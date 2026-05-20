@@ -17,7 +17,6 @@ public class Monde {
 
     public Secteur[][] getGrille()      { return this.grille; }
     public int getTourActuel()         { return this.tourActuel; }
-
     public void initialiser() {
         grille = new Secteur[10][10];
         tourActuel = 0;

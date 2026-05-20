@@ -37,7 +37,6 @@ public class TestExtraireMine {
     }
     @Test
     void test4() {
-        // nbMn = 1, qte = 3 -> attendu = 1 [cite: 13]
         mine = new Mine(1, null, TypeMinerai.OR, 1);
         assertEquals(1, mine.extraire(3));
     }
