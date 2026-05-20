@@ -3,7 +3,6 @@ package org.example.Controleur;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
 import org.example.Model.*;
 import org.example.Vue.MondeVue;
 
@@ -15,7 +14,6 @@ public class MainFX extends Application {
 
     @Override
     public void start(Stage stage) {
-
         Monde monde = new Monde(null, 0);
         monde.initialiser();
 
@@ -32,12 +30,16 @@ public class MainFX extends Application {
 
         MondeVue vue = new MondeVue(monde);
 
-        Scene scene = new Scene(vue, 1050, 760);
+        Scene scene = new Scene(vue, 1600, 900);
         vue.ajouterControleClavier(scene);
 
-        stage.setScene(scene);
         stage.setTitle("Robots mineurs");
+        stage.setScene(scene);
+        stage.setMaximized(true);
+        stage.setResizable(true);
         stage.show();
+
+        vue.requestFocus();
     }
 
     private void ajouterMine(Secteur[][] grille, int numero, TypeMinerai type) {
@@ -54,6 +56,7 @@ public class MainFX extends Application {
 
     private void ajouterRobot(Secteur[][] grille, int numero, TypeMinerai type) {
         Secteur secteur = getSecteurLibre(grille);
+
         Robot robot = new Robot(
                 numero,
                 secteur,
@@ -61,6 +64,7 @@ public class MainFX extends Application {
                 5 + random.nextInt(5),
                 1 + random.nextInt(3)
         );
+
         secteur.setRobot(robot);
     }
 

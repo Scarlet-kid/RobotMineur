@@ -2,9 +2,11 @@ package org.example.Vue;
 
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import org.example.Model.*;
 
 import java.util.ArrayList;
@@ -13,305 +15,333 @@ import java.util.List;
 
 public class MondeVue extends BorderPane {
 
-    private static final int TAILLE_CASE = 72;
-
     private final Monde monde;
-    private final CelluleVue[][] cellules = new CelluleVue[10][10];
+
+    private final GridPane grille = new GridPane();
 
     private final Label tourLabel = new Label();
-    private final Label robotCourantLabel = new Label();
+    private final Label robotActuelLabel = new Label();
     private final Label messageLabel = new Label();
-    private final VBox panneauInfos = new VBox(8);
 
-    private int indexRobotCourant = 0;
-    private int nbActionsValidesDansTour = 0;
+    private final Label robotsLabel = new Label();
+    private final Label composantsLabel = new Label();
+
+    private int robotActuel = 0;
+    private int actionsTour = 0;
 
     public MondeVue(Monde monde) {
+
         this.monde = monde;
 
-        setPadding(new Insets(8));
-        setStyle("-fx-background-color: #f5f5f5;");
+        setStyle("-fx-background-color: #e9e9e9;");
 
-        setCenter(creerGrille());
-        setRight(creerPanneau());
-
-        rafraichir();
-    }
-
-    private GridPane creerGrille() {
-        GridPane grille = new GridPane();
         grille.setHgap(0);
         grille.setVgap(0);
-        grille.setMaxWidth(10 * TAILLE_CASE);
-        grille.setMaxHeight(10 * TAILLE_CASE);
+
+        creerGrille();
+
+        VBox panneau = creerPanneau();
+
+        panneau.setPrefWidth(320);
+
+        setCenter(grille);
+        setRight(panneau);
+
+        BorderPane.setMargin(grille, Insets.EMPTY);
+
+        grille.prefWidthProperty().bind(widthProperty().subtract(320));
+        grille.prefHeightProperty().bind(heightProperty());
+
+        rafraichirInfos();
+    }
+
+    private void creerGrille() {
+
+        grille.getChildren().clear();
+        grille.getColumnConstraints().clear();
+        grille.getRowConstraints().clear();
 
         for (int i = 0; i < 10; i++) {
-            ColumnConstraints col = new ColumnConstraints();
-            col.setPrefWidth(TAILLE_CASE);
-            col.setMinWidth(TAILLE_CASE);
-            col.setMaxWidth(TAILLE_CASE);
 
-            RowConstraints row = new RowConstraints();
-            row.setPrefHeight(TAILLE_CASE);
-            row.setMinHeight(TAILLE_CASE);
-            row.setMaxHeight(TAILLE_CASE);
+            ColumnConstraints colonne = new ColumnConstraints();
+            colonne.setPercentWidth(10);
 
-            grille.getColumnConstraints().add(col);
-            grille.getRowConstraints().add(row);
+            RowConstraints ligne = new RowConstraints();
+            ligne.setPercentHeight(10);
+
+            grille.getColumnConstraints().add(colonne);
+            grille.getRowConstraints().add(ligne);
         }
 
         Secteur[][] secteurs = monde.getGrille();
 
-        for (int l = 0; l < 10; l++) {
-            for (int c = 0; c < 10; c++) {
-                CelluleVue cellule = new CelluleVue(secteurs[l][c]);
+        for (int ligne = 0; ligne < 10; ligne++) {
 
-                cellule.setPrefSize(TAILLE_CASE, TAILLE_CASE);
-                cellule.setMinSize(TAILLE_CASE, TAILLE_CASE);
-                cellule.setMaxSize(TAILLE_CASE, TAILLE_CASE);
+            for (int colonne = 0; colonne < 10; colonne++) {
 
-                cellules[l][c] = cellule;
-                grille.add(cellule, c, l);
+                CelluleVue cellule =
+                        new CelluleVue(secteurs[ligne][colonne]);
+
+                cellule.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
+                GridPane.setHgrow(cellule, Priority.ALWAYS);
+                GridPane.setVgrow(cellule, Priority.ALWAYS);
+
+                grille.add(cellule, colonne, ligne);
             }
         }
-
-        return grille;
     }
 
     private VBox creerPanneau() {
-        VBox box = new VBox(10);
-        box.setPadding(new Insets(10));
-        box.setPrefWidth(280);
-        box.setStyle("-fx-background-color: white; -fx-border-color: #cccccc;");
 
-        tourLabel.setStyle("-fx-font-size: 20; -fx-font-weight: bold;");
-        robotCourantLabel.setStyle("-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #243b6b;");
+        VBox panneau = new VBox(12);
+
+        panneau.setPadding(new Insets(15));
+
+        panneau.setStyle("""
+                -fx-background-color: white;
+                -fx-border-color: #cccccc;
+                """);
+
+        tourLabel.setStyle("""
+                -fx-font-size: 30;
+                -fx-font-weight: bold;
+                """);
+
+        robotActuelLabel.setStyle("""
+                -fx-font-size: 20;
+                -fx-font-weight: bold;
+                -fx-text-fill: #102c6b;
+                """);
+
         messageLabel.setWrapText(true);
-        messageLabel.setStyle("-fx-font-size: 13; -fx-font-weight: bold;");
 
-        Label aide = new Label(
-                "COMMANDES CLAVIER\n\n" +
-                        "↑ : Nord\n" +
-                        "↓ : Sud\n" +
-                        "← : Ouest\n" +
-                        "→ : Est\n\n" +
-                        "R : Récolter\n" +
-                        "D : Déposer"
-        );
+        Label commandes = new Label("""
+                COMMANDES CLAVIER
 
-        aide.setWrapText(true);
-        aide.setStyle("-fx-font-size: 13; -fx-text-fill: #444444;");
+                ↑ : Nord
+                ↓ : Sud
+                ← : Ouest
+                → : Est
 
-        box.getChildren().addAll(
+                R : Récolter
+                D : Déposer
+                """);
+
+        panneau.getChildren().addAll(
                 tourLabel,
-                robotCourantLabel,
+                robotActuelLabel,
                 messageLabel,
                 new Separator(),
-                aide,
+                commandes,
                 new Separator(),
-                panneauInfos
+                robotsLabel,
+                new Separator(),
+                composantsLabel
         );
 
-        return box;
+        return panneau;
     }
 
     private List<Robot> recupererRobots() {
+
         List<Robot> robots = new ArrayList<>();
 
-        for (int l = 0; l < 10; l++) {
-            for (int c = 0; c < 10; c++) {
-                Robot r = monde.getGrille()[l][c].getRobot();
+        for (int ligne = 0; ligne < 10; ligne++) {
 
-                if (r != null) {
-                    robots.add(r);
+            for (int colonne = 0; colonne < 10; colonne++) {
+
+                Robot robot =
+                        monde.getGrille()[ligne][colonne].getRobot();
+
+                if (robot != null) {
+                    robots.add(robot);
                 }
             }
         }
 
         robots.sort(Comparator.comparingInt(Robot::getNumero));
+
         return robots;
     }
 
-    private Robot getRobotCourant() {
+    private Robot getRobotActuel() {
+
         List<Robot> robots = recupererRobots();
 
         if (robots.isEmpty()) {
             return null;
         }
 
-        if (indexRobotCourant >= robots.size()) {
-            indexRobotCourant = 0;
+        if (robotActuel >= robots.size()) {
+            robotActuel = 0;
         }
 
-        return robots.get(indexRobotCourant);
-    }
-
-    private void passerAuRobotSuivant() {
-        List<Robot> robots = recupererRobots();
-
-        if (robots.isEmpty()) {
-            return;
-        }
-
-        nbActionsValidesDansTour++;
-
-        if (nbActionsValidesDansTour >= robots.size()) {
-            monde.jouerTour();
-            nbActionsValidesDansTour = 0;
-        }
-
-        indexRobotCourant = (indexRobotCourant + 1) % robots.size();
-    }
-
-    private void jouerDeplacement(Directions direction) {
-        Robot robot = getRobotCourant();
-
-        if (robot == null) {
-            afficherMessage("Aucun robot disponible.", false);
-            return;
-        }
-
-        boolean ok = robot.avancer(direction, monde.getGrille());
-
-        if (ok) {
-            passerAuRobotSuivant();
-            afficherMessage("Déplacement réussi. Robot suivant.", true);
-        } else {
-            afficherMessage("Action invalide : déplacement impossible. Le même robot doit rejouer.", false);
-        }
-
-        rafraichir();
-    }
-
-    private void jouerRecolter() {
-        Robot robot = getRobotCourant();
-
-        if (robot == null) {
-            afficherMessage("Aucun robot disponible.", false);
-            return;
-        }
-
-        boolean ok = robot.recolter();
-
-        if (ok) {
-            passerAuRobotSuivant();
-            afficherMessage("Récolte réussie. Robot suivant.", true);
-        } else {
-            afficherMessage("Action invalide : récolte impossible. Le même robot doit rejouer.", false);
-        }
-
-        rafraichir();
-    }
-
-    private void jouerDeposer() {
-        Robot robot = getRobotCourant();
-
-        if (robot == null) {
-            afficherMessage("Aucun robot disponible.", false);
-            return;
-        }
-
-        boolean ok = robot.deposer();
-
-        if (ok) {
-            passerAuRobotSuivant();
-            afficherMessage("Dépôt réussi. Robot suivant.", true);
-        } else {
-            afficherMessage("Action invalide : dépôt impossible. Le même robot doit rejouer.", false);
-        }
-
-        rafraichir();
-    }
-
-    private void afficherMessage(String texte, boolean succes) {
-        messageLabel.setText(texte);
-
-        if (succes) {
-            messageLabel.setStyle("-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: green;");
-        } else {
-            messageLabel.setStyle("-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: red;");
-        }
+        return robots.get(robotActuel);
     }
 
     public void ajouterControleClavier(Scene scene) {
-        scene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.UP) {
-                jouerDeplacement(Directions.NORD);
-            } else if (e.getCode() == KeyCode.DOWN) {
-                jouerDeplacement(Directions.SUD);
-            } else if (e.getCode() == KeyCode.LEFT) {
-                jouerDeplacement(Directions.OUEST);
-            } else if (e.getCode() == KeyCode.RIGHT) {
-                jouerDeplacement(Directions.EST);
-            } else if (e.getCode() == KeyCode.R) {
-                jouerRecolter();
-            } else if (e.getCode() == KeyCode.D) {
-                jouerDeposer();
+
+        scene.setOnKeyPressed(event -> {
+
+            Robot robot = getRobotActuel();
+
+            if (robot == null) {
+                return;
             }
+
+            boolean actionValide = false;
+
+            if (event.getCode() == KeyCode.UP) {
+                actionValide =
+                        robot.avancer(Directions.NORD, monde.getGrille());
+            }
+
+            else if (event.getCode() == KeyCode.DOWN) {
+                actionValide =
+                        robot.avancer(Directions.SUD, monde.getGrille());
+            }
+
+            else if (event.getCode() == KeyCode.LEFT) {
+                actionValide =
+                        robot.avancer(Directions.OUEST, monde.getGrille());
+            }
+
+            else if (event.getCode() == KeyCode.RIGHT) {
+                actionValide =
+                        robot.avancer(Directions.EST, monde.getGrille());
+            }
+
+            else if (event.getCode() == KeyCode.R) {
+                actionValide = robot.recolter();
+            }
+
+            else if (event.getCode() == KeyCode.D) {
+                actionValide = robot.deposer();
+            }
+
+            if (actionValide) {
+
+                actionsTour++;
+
+                if (actionsTour >= recupererRobots().size()) {
+
+                    monde.jouerTour();
+                    actionsTour = 0;
+                }
+
+                robotActuel++;
+
+                if (robotActuel >= recupererRobots().size()) {
+                    robotActuel = 0;
+                }
+
+                messageLabel.setTextFill(Color.GREEN);
+                messageLabel.setText("Action réussie");
+            }
+
+            else {
+
+                messageLabel.setTextFill(Color.RED);
+                messageLabel.setText("Action invalide");
+            }
+
+            rafraichir();
         });
     }
 
-    public void rafraichir() {
-        tourLabel.setText("Tour : " + monde.getTourActuel());
+    private void rafraichir() {
 
-        Robot courant = getRobotCourant();
-
-        if (courant != null) {
-            robotCourantLabel.setText("À jouer : robot_" + typeRobot(courant));
-        } else {
-            robotCourantLabel.setText("Aucun robot");
-        }
-
-        for (int l = 0; l < 10; l++) {
-            for (int c = 0; c < 10; c++) {
-                cellules[l][c].rafraichir(monde.getGrille()[l][c]);
-            }
-        }
-
-        panneauInfos.getChildren().clear();
-
-        panneauInfos.getChildren().add(new Label("ROBOTS"));
-
-        for (Robot r : recupererRobots()) {
-            panneauInfos.getChildren().add(new Label(
-                    "robot_" + typeRobot(r)
-                            + " : "
-                            + r.getSecteur().getLigne()
-                            + ","
-                            + r.getSecteur().getColonne()
-            ));
-        }
-
-        panneauInfos.getChildren().add(new Separator());
-        panneauInfos.getChildren().add(new Label("COMPOSANTS"));
-
-        for (int l = 0; l < 10; l++) {
-            for (int c = 0; c < 10; c++) {
-                Composantes comp = monde.getGrille()[l][c].getComposante();
-
-                if (comp instanceof Mine mine) {
-                    String nom = mine.getType() == TypeMinerai.OR ? "mine_or" : "mine_nickel";
-
-                    panneauInfos.getChildren().add(new Label(
-                            nom + " : "
-                                    + mine.getSecteur().getLigne()
-                                    + ","
-                                    + mine.getSecteur().getColonne()
-                    ));
-                }
-
-                if (comp instanceof Entrepot entrepot) {
-                    String nom = entrepot.getType() == TypeMinerai.OR ? "entrepot_or" : "entrepot_nickel";
-
-                    panneauInfos.getChildren().add(new Label(
-                            nom + " stock : " + entrepot.getStock()
-                    ));
-                }
-            }
-        }
+        creerGrille();
+        rafraichirInfos();
     }
 
-    private String typeRobot(Robot r) {
-        return r.toString().contains("OR") ? "or" : "nickel";
+    private void rafraichirInfos() {
+
+        tourLabel.setText("Tour : " + monde.getTourActuel());
+
+        Robot robot = getRobotActuel();
+
+        if (robot == null) {
+            robotActuelLabel.setText("Aucun robot");
+        }
+
+        else {
+
+            if (robot.getType() == TypeMinerai.OR) {
+                robotActuelLabel.setText("À jouer : robot_or");
+            }
+            else {
+                robotActuelLabel.setText("À jouer : robot_nickel");
+            }
+        }
+
+        StringBuilder robots = new StringBuilder("ROBOTS\n\n");
+
+        for (Robot r : recupererRobots()) {
+
+            String nom;
+
+            if (r.getType() == TypeMinerai.OR) {
+                nom = "robot_or";
+            }
+            else {
+                nom = "robot_nickel";
+            }
+
+            robots.append(nom)
+                    .append(" : ")
+                    .append(r.getSecteur().getLigne())
+                    .append(",")
+                    .append(r.getSecteur().getColonne())
+                    .append("\n");
+        }
+
+        robotsLabel.setText(robots.toString());
+
+        StringBuilder composants =
+                new StringBuilder("COMPOSANTS\n\n");
+
+        for (int ligne = 0; ligne < 10; ligne++) {
+
+            for (int colonne = 0; colonne < 10; colonne++) {
+
+                Composantes composante =
+                        monde.getGrille()[ligne][colonne]
+                                .getComposante();
+
+                if (composante instanceof Mine mine) {
+
+                    if (mine.getType() == TypeMinerai.OR) {
+                        composants.append("mine_or");
+                    }
+                    else {
+                        composants.append("mine_nickel");
+                    }
+
+                    composants.append(" : ")
+                            .append(ligne)
+                            .append(",")
+                            .append(colonne)
+                            .append("\n");
+                }
+
+                if (composante instanceof Entrepot entrepot) {
+
+                    if (entrepot.getType() == TypeMinerai.OR) {
+                        composants.append("entrepot_or");
+                    }
+                    else {
+                        composants.append("entrepot_nickel");
+                    }
+
+                    composants.append(" stock : ")
+                            .append(entrepot.getStock())
+                            .append("\n");
+                }
+            }
+        }
+
+        composantsLabel.setText(composants.toString());
     }
 }
