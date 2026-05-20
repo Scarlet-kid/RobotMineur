@@ -106,12 +106,6 @@ public class MondeVue extends BorderPane {
                 -fx-font-weight: bold;
                 """);
 
-        Label commandes = carteTexte(
-                "COMMANDES CLAVIER",
-                "↑ : Nord\n↓ : Sud\n← : Ouest\n→ : Est\n\nR : Récolter\nD : Déposer",
-                "#FFF3D8"
-        );
-
         VBox header = new VBox(8, tourLabel, robotActuelLabel, messageLabel);
         header.setPadding(new Insets(12));
         header.setStyle("""
@@ -122,16 +116,49 @@ public class MondeVue extends BorderPane {
                 -fx-border-width: 1.5;
                 """);
 
+        Label commandesTexte = carteTexte(
+                "GUIDE DU JEU",
+                "DÉPLACEMENTS\n" +
+                        "↑ : Aller au nord\n" +
+                        "↓ : Aller au sud\n" +
+                        "← : Aller à l’ouest\n" +
+                        "→ : Aller à l’est\n\n" +
+                        "ACTIONS\n" +
+                        "R : Récolter des minerais\n" +
+                        "D : Déposer les minerais\n\n" +
+                        "RÈGLES\n" +
+                        "• Un robot OR récolte seulement l’or\n" +
+                        "• Un robot NICKEL récolte seulement le nickel\n" +
+                        "• Un robot ne peut pas traverser l’eau\n" +
+                        "• Un robot ne peut pas aller sur une case occupée\n" +
+                        "• La capacité d’extraction indique combien de minerais un robot peut extraire en une seule action\n" +
+                        "• Le stockage maximum limite le nombre de minerais transportés\n\n" +
+                        "OBJECTIF\n" +
+                        "Récolter les minerais des mines puis les déposer dans le bon entrepôt.",
+                "#FFF3D8"
+        );
+
+        ScrollPane guideScroll = new ScrollPane(commandesTexte);
+        guideScroll.setFitToWidth(true);
+        guideScroll.setPrefHeight(190);
+        guideScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        guideScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        guideScroll.setStyle("""
+                -fx-background: transparent;
+                -fx-background-color: transparent;
+                """);
+
         panneauInfos.setFillWidth(true);
 
         ScrollPane scroll = new ScrollPane(panneauInfos);
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
         VBox.setVgrow(scroll, Priority.ALWAYS);
 
-        panneau.getChildren().addAll(header, commandes, scroll);
+        panneau.getChildren().addAll(header, guideScroll, scroll);
 
         return panneau;
     }
@@ -195,7 +222,6 @@ public class MondeVue extends BorderPane {
         }
 
         robots.sort(Comparator.comparingInt(Robot::getNumero));
-
         return robots;
     }
 
@@ -291,7 +317,9 @@ public class MondeVue extends BorderPane {
             String couleur = r.getType() == TypeMinerai.OR ? "#FFD166" : "#74B9E7";
 
             String texte = nom
-                    + "\nStockage : " + r.getNbMinerais() + " / " + r.getCapaciteStockage();
+                    + "\nStockage : " + r.getNbMinerais() + " / " + r.getCapaciteStockage()
+                    + "\nExtraction : " + r.getCapaciteExtraction() + " minerais/action";
+
             Composantes comp = r.getSecteur().getComposante();
 
             if (comp instanceof Mine mine) {
