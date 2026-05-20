@@ -20,7 +20,7 @@ public class Robot extends Composantes {
         this.capaciteStockage = capaciteStockage;
         this.capaciteExtraction = capaciteExtraction;
     }
-    public void SetNbMineris(int nb)
+    public void SetNbMinerais(int nb)
     {
         this.nbMinerais = nb;
     }

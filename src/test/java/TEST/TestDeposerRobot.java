@@ -52,7 +52,7 @@ public class TestDeposerRobot {
     {
         secteur.setComposante(new Entrepot(TypeMinerai.OR,2,secteur));
         robot = new Robot(2,secteur,TypeMinerai.OR,55,1);
-        robot.SetNbMineris(1);
+        robot.SetNbMinerais(1);
         assertEquals(true, robot.deposer());
     }
 }
