@@ -21,6 +21,12 @@ public class Robot extends Composantes {
         this.capaciteExtraction = capaciteExtraction;
     }
 
+    public int getCapaciteExtraction() {
+        return capaciteExtraction;
+    }
+
+
+
     public boolean avancer(Directions dir, Secteur[][] grille) {
 
         if (secteur == null) {

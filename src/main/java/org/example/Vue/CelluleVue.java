@@ -1,5 +1,6 @@
 package org.example.Vue;
 
+import javafx.geometry.Pos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
@@ -7,75 +8,83 @@ import org.example.Model.*;
 
 public class CelluleVue extends StackPane {
 
-    private static final int TAILLE = 78;
-
-    private final ImageView fond = new ImageView();
-    private final ImageView composant = new ImageView();
-    private final ImageView robot = new ImageView();
+    private static final int TAILLE = 70;
+    private final Secteur secteur;
 
     public CelluleVue(Secteur secteur) {
+        this.secteur = secteur;
+
         setPrefSize(TAILLE, TAILLE);
         setMinSize(TAILLE, TAILLE);
         setMaxSize(TAILLE, TAILLE);
 
-        configurerImage(fond);
-        configurerImage(composant);
-        configurerImage(robot);
-
-        getChildren().addAll(fond, composant, robot);
-
-        setStyle("-fx-border-color: #cccccc; -fx-border-width: 0.5;");
-
-        rafraichir(secteur);
+        rafraichir();
     }
 
-    private void configurerImage(ImageView image) {
-        image.setFitWidth(TAILLE);
-        image.setFitHeight(TAILLE);
-        image.setPreserveRatio(false);
-        image.setSmooth(true);
+    public void rafraichir() {
+        getChildren().clear();
+
+        ImageView fond = new ImageView(
+                secteur.EstEau() ? charger("eau.png") : charger("terrain.png")
+        );
+
+        reglerImage(fond, TAILLE, TAILLE);
+        getChildren().add(fond);
+
+        Composantes composante = secteur.getComposante();
+
+        if (composante instanceof Mine mine) {
+            ImageView mineVue = new ImageView(
+                    mine.getType() == TypeMinerai.OR
+                            ? charger("mine_or.png")
+                            : charger("mine_ni.png")
+            );
+
+            reglerImage(mineVue, TAILLE, TAILLE);
+            getChildren().add(mineVue);
+        }
+
+        if (composante instanceof Entrepot entrepot) {
+            ImageView entrepotVue = new ImageView(
+                    entrepot.getType() == TypeMinerai.OR
+                            ? charger("entrepot_or.jpg")
+                            : charger("entrepot_ni.png")
+            );
+
+            reglerImage(entrepotVue, TAILLE, TAILLE);
+            getChildren().add(entrepotVue);
+        }
+
+        Robot robot = secteur.getRobot();
+
+        if (robot != null) {
+            ImageView robotVue = new ImageView(
+                    robot.getType() == TypeMinerai.OR
+                            ? charger("robot_or.png")
+                            : charger("robot_ni.png")
+            );
+
+            reglerImage(robotVue, TAILLE, TAILLE);
+            StackPane.setAlignment(robotVue, Pos.CENTER);
+
+            getChildren().add(robotVue);
+        }
+    }
+
+    private void reglerImage(ImageView imageView, int largeur, int hauteur) {
+        imageView.setFitWidth(largeur);
+        imageView.setFitHeight(hauteur);
+        imageView.setPreserveRatio(false);
+        imageView.setSmooth(true);
     }
 
     private Image charger(String nom) {
-        return new Image(getClass().getResourceAsStream("/images/" + nom));
-    }
+        var flux = getClass().getResourceAsStream("/images/" + nom);
 
-    public void rafraichir(Secteur secteur) {
-        fond.setImage(charger("terrain.png"));
-        composant.setImage(null);
-        robot.setImage(null);
-
-        if (secteur.EstEau()) {
-            fond.setImage(charger("eau.png"));
-            return;
+        if (flux == null) {
+            throw new RuntimeException("Image introuvable : /images/" + nom);
         }
 
-        Composantes c = secteur.getComposante();
-
-        if (c instanceof Mine mine) {
-            if (mine.getType() == TypeMinerai.OR) {
-                composant.setImage(charger("mine_or.jpg"));
-            } else {
-                composant.setImage(charger("mine_ni.png"));
-            }
-        }
-
-        if (c instanceof Entrepot entrepot) {
-            if (entrepot.getType() == TypeMinerai.OR) {
-                composant.setImage(charger("entrepot_or.jpg"));
-            } else {
-                composant.setImage(charger("entrepot_ni.png"));
-            }
-        }
-
-        Robot r = secteur.getRobot();
-
-        if (r != null) {
-            if (r.getType() == TypeMinerai.OR) {
-                robot.setImage(charger("robot_or.png"));
-            } else {
-                robot.setImage(charger("robot_ni.png"));
-            }
-        }
+        return new Image(flux);
     }
 }
