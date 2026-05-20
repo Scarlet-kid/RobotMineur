@@ -55,17 +55,17 @@ public class Monde {
                 }
 
                 char c = Character.toUpperCase(line.charAt(0));
-                Directions dir = switch (c) {
-                    case 'N' -> Directions.NORD;
-                    case 'S' -> Directions.SUD;
-                    case 'E' -> Directions.EST;
-                    case 'O' -> Directions.OUEST;
-                    default -> {
-                        System.out.println("Direction inconnue – utilisez N, E, S ou O.");
-                        yield null;
-                    }
-                };
-                if (dir == null) {
+                Directions dir = null;
+                if (c == 'N') {
+                    dir = Directions.NORD;
+                } else if (c == 'S') {
+                    dir = Directions.SUD;
+                } else if (c == 'E') {
+                    dir = Directions.EST;
+                } else if (c == 'O') {
+                    dir = Directions.OUEST;
+                } else {
+                    System.out.println("Direction inconnue – utilisez N, E, S ou O.");
                     continue;
                 }
                 actionOk = r.avancer(dir, grille);
