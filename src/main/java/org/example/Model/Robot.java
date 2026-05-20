@@ -25,6 +25,12 @@ public class Robot extends Composantes {
         this.nbMinerais = nb;
     }
 
+    public int getCapaciteExtraction() {
+        return capaciteExtraction;
+    }
+
+
+
     public boolean avancer(Directions dir, Secteur[][] grille) {
 
         if (secteur == null) {
@@ -194,5 +200,17 @@ public class Robot extends Composantes {
                 + " " + secteur.getColonne()
                 + " " + typeStr
                 + " " + nbMinerais + " / " + capaciteStockage;
+    }
+
+    public TypeMinerai getType() {
+        return type;
+    }
+
+    public int getNbMinerais() {
+        return nbMinerais;
+    }
+
+    public int getCapaciteStockage() {
+        return capaciteStockage;
     }
 }
