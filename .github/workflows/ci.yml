@@ -1,42 +1,32 @@
-name: CI – Build & Test
+name: Création automatique du JAR
 
+# Le robot se réveille uniquement quand tu pousses un tag
 on:
   push:
-    branches: [dev, main]
-  pull_request:
-    branches: [dev, main]
+    tags:
+      - 'v*'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Récupération du code
+        uses: actions/checkout@v3
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - name: Installation de Java 21
+        uses: actions/setup-java@v3
         with:
-          distribution: temurin
           java-version: '21'
+          distribution: 'temurin'
+          cache: maven
 
-      - name: Cache Maven repository
-        uses: actions/cache@v4
+      - name: Compilation et Création du JAR avec Maven
+        run: mvn clean package
+
+      - name: Mise en ligne du JAR sur la page GitHub (Release)
+        uses: softprops/action-gh-release@v1
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Build & run tests
-        run: mvn -B clean verify      # compile + run JUnit
-
-      - name: Package JAR (with dependencies)
-        run: mvn -B package
-
-      - name: Upload JAR artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: sae2-jar
-          path: target/robot-miniers-*.jar
+          files: target/*-shaded.jar # Le nom généré par le plugin Shade
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
