@@ -257,7 +257,7 @@ public class MondeVue extends BorderPane {
         rafraichir();
     }
 
-    private void rafraichir() {
+    public void rafraichir() {
         creerGrille();
         rafraichirInfos();
     }

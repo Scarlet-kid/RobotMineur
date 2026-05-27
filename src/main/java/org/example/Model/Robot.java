@@ -1,5 +1,8 @@
 package org.example.Model;
 
+
+import java.util.List;
+
 import java.util.Scanner;
 
 public class Robot extends Composantes {
@@ -213,4 +216,111 @@ public class Robot extends Composantes {
     public int getCapaciteStockage() {
         return capaciteStockage;
     }
+
+    /**
+     * Le robot agit tout seul a chaque tour :
+     *  1. S'il porte des minerais -> va vers son entrepot
+     *  2. Sinon -> va vers la mine de son type la plus proche
+     *  3. S'il est sur sa destination -> recolte ou depose
+     *  4. Sinon -> suit Dijkstra
+     *
+     * Ajoute cette methode dans Robot.java avec :
+     *   import org.example.Algorithme.Dijkstra;
+     *   import java.util.List;
+     */
+    public void agirAutonome(Secteur[][] grille, List<Mine> mines, List<Entrepot> entrepots) {
+
+        Composantes c = secteur.getComposante();
+
+        // 1. Si on est sur une mine de notre type et qu'on peut recolter
+        if (c instanceof Mine) {
+            Mine m = (Mine) c;
+            if (m.getType() == type && !m.estVide() && nbMinerais < capaciteStockage) {
+                recolter();
+                return;
+            }
+        }
+
+        // 2. Si on est sur notre entrepot
+        if (c instanceof Entrepot) {
+            Entrepot e = (Entrepot) c;
+            if (e.getType() == type && nbMinerais > 0) {
+                deposer();
+                return;
+            }
+        }
+
+        // 3. Determiner la destination
+        Secteur destination = null;
+
+        if (nbMinerais >= capaciteStockage || (nbMinerais > 0 && toutesMinesVides(mines))) {
+            // Aller deposer
+            destination = trouverEntrepot(entrepots);
+        } else {
+            // Aller recolter dans la mine la plus proche
+            destination = trouverMineLaPlusProche(mines, grille);
+        }
+
+        if (destination == null) {
+            System.out.println("Robot " + numero + " : pas de destination disponible.");
+            return;
+        }
+
+        // 4. Calculer le chemin avec Dijkstra
+        List<Directions> chemin = Dijkstra.calculerChemin(grille, secteur, destination);
+
+        if (chemin.isEmpty()) {
+            System.out.println("Robot " + numero + " : pas de chemin trouve.");
+            return;
+        }
+
+        // 5. Avancer d'une case
+        avancer(chemin.get(0), grille);
+    }
+
+    /**
+     * Trouve la mine de notre type la plus proche (non vide).
+     */
+    private Secteur trouverMineLaPlusProche(List<Mine> mines, Secteur[][] grille) {
+        Secteur meilleure = null;
+        int distMin = Integer.MAX_VALUE;
+
+        for (Mine m : mines) {
+            if (m.getType() != type || m.estVide()) continue;
+
+            List<Directions> chemin = Dijkstra.calculerChemin(grille, secteur, m.getSecteur());
+            if (chemin.isEmpty()) continue;
+
+            if (chemin.size() < distMin) {
+                distMin = chemin.size();
+                meilleure = m.getSecteur();
+            }
+        }
+
+        return meilleure;
+    }
+
+    /**
+     * Trouve l'entrepot de notre type.
+     */
+    private Secteur trouverEntrepot(List<Entrepot> entrepots) {
+        for (Entrepot e : entrepots) {
+            if (e.getType() == type) {
+                return e.getSecteur();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Verifie si toutes les mines de notre type sont vides.
+     */
+    private boolean toutesMinesVides(List<Mine> mines) {
+        for (Mine m : mines) {
+            if (m.getType() == type && !m.estVide()) return false;
+        }
+        return true;
+    }
+
+
 }
