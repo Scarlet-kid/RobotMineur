@@ -12,6 +12,19 @@ public class CelluleVue extends StackPane {
 
     private final Secteur secteur;
 
+    // ----------------------------------------------------------------
+    // IMAGES STATIQUES : chargées UNE SEULE FOIS pour toute l'appli
+    // static = partagées entre toutes les CelluleVue
+    // ----------------------------------------------------------------
+    private static final Image IMG_EAU       = chargerStatic("eau.png");
+    private static final Image IMG_TERRAIN   = chargerStatic("terrain.png");
+    private static final Image IMG_MINE_OR   = chargerStatic("mine_or.png");
+    private static final Image IMG_MINE_NI   = chargerStatic("mine_ni.png");
+    private static final Image IMG_ENTREPOT_OR = chargerStatic("entrepot_or.jpg");
+    private static final Image IMG_ENTREPOT_NI = chargerStatic("entrepot_ni.png");
+    private static final Image IMG_ROBOT_OR  = chargerStatic("robot_or.png");
+    private static final Image IMG_ROBOT_NI  = chargerStatic("robot_ni.png");
+
     public CelluleVue(Secteur secteur) {
         this.secteur = secteur;
         setMinSize(0, 0);
@@ -21,10 +34,8 @@ public class CelluleVue extends StackPane {
     public void rafraichir() {
         getChildren().clear();
 
-        // Fond
-        ImageView fond = new ImageView(
-                secteur.EstEau() ? charger("eau.png") : charger("terrain.png")
-        );
+        // Fond : on réutilise l'image déjà chargée, pas de new Image() !
+        ImageView fond = new ImageView(secteur.EstEau() ? IMG_EAU : IMG_TERRAIN);
         reglerImage(fond);
         getChildren().add(fond);
 
@@ -34,9 +45,7 @@ public class CelluleVue extends StackPane {
         // Mines
         if (composante instanceof Mine mine) {
             ImageView mineVue = new ImageView(
-                    mine.getType() == TypeMinerai.OR
-                            ? charger("mine_or.png")
-                            : charger("mine_ni.png")
+                    mine.getType() == TypeMinerai.OR ? IMG_MINE_OR : IMG_MINE_NI
             );
             reglerImage(mineVue);
             getChildren().add(mineVue);
@@ -46,23 +55,18 @@ public class CelluleVue extends StackPane {
         // Entrepôts
         if (composante instanceof Entrepot entrepot) {
             ImageView entrepotVue = new ImageView(
-                    entrepot.getType() == TypeMinerai.OR
-                            ? charger("entrepot_or.jpg")
-                            : charger("entrepot_ni.png")
+                    entrepot.getType() == TypeMinerai.OR ? IMG_ENTREPOT_OR : IMG_ENTREPOT_NI
             );
             reglerImage(entrepotVue);
             getChildren().add(entrepotVue);
             infoTooltip = "Entrepôt " + entrepot.getType() + "\nStock : " + entrepot.getStock();
         }
 
-        Robot robot = secteur.getRobot();
-
         // Robots
+        Robot robot = secteur.getRobot();
         if (robot != null) {
             ImageView robotVue = new ImageView(
-                    robot.getType() == TypeMinerai.OR
-                            ? charger("robot_or.png")
-                            : charger("robot_ni.png")
+                    robot.getType() == TypeMinerai.OR ? IMG_ROBOT_OR : IMG_ROBOT_NI
             );
             reglerImage(robotVue);
             StackPane.setAlignment(robotVue, Pos.CENTER);
@@ -70,9 +74,8 @@ public class CelluleVue extends StackPane {
             infoTooltip = "Robot " + robot.getType() + "\nTransporte : " + robot.getNbMinerais();
         }
 
-        // CRITÈRE BASTIEN & SCAPIN : Guidage (Information immédiate)
         Tooltip tooltip = new Tooltip(infoTooltip);
-        tooltip.setShowDelay(Duration.millis(200)); // S'affiche rapidement
+        tooltip.setShowDelay(Duration.millis(200));
         tooltip.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
         Tooltip.install(this, tooltip);
     }
@@ -84,8 +87,9 @@ public class CelluleVue extends StackPane {
         imageView.setSmooth(true);
     }
 
-    private Image charger(String nom) {
-        var flux = getClass().getResourceAsStream("/images/" + nom);
+    // Méthode statique pour charger une image une seule fois
+    private static Image chargerStatic(String nom) {
+        var flux = CelluleVue.class.getResourceAsStream("/images/" + nom);
         if (flux == null) {
             throw new RuntimeException("Image introuvable : /images/" + nom);
         }

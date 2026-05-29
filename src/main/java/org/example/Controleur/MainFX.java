@@ -3,6 +3,7 @@ package org.example.Controleur;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
@@ -24,9 +25,9 @@ public class MainFX extends Application {
 
     private Monde monde;
     private Secteur[][] grille;
-    private List<Mine> mines = new ArrayList<>();
+    private List<Mine> mines     = new ArrayList<>();
     private List<Entrepot> entrepots = new ArrayList<>();
-    private List<Robot> robots = new ArrayList<>();
+    private List<Robot> robots   = new ArrayList<>();
 
     private MondeVue vue;
     private Timeline auto;
@@ -46,7 +47,6 @@ public class MainFX extends Application {
 
         vue = new MondeVue(monde);
 
-        // --- Boutons mode auto ---
         Button btnAuto = new Button("▶ Lancer mode auto");
         btnAuto.setStyle("-fx-background-color: #2A7A2A; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;");
         btnAuto.setOnAction(e -> demarrerModeAuto(btnAuto));
@@ -71,7 +71,7 @@ public class MainFX extends Application {
         Scene scene = new Scene(root, 1600, 900);
         vue.ajouterControleClavier(scene);
 
-        stage.setTitle("Robots mineurs - Mode autonome (Dijkstra)");
+        stage.setTitle("Robots mineurs - Mode autonome (A*)");
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.setResizable(true);
@@ -80,9 +80,6 @@ public class MainFX extends Application {
         vue.requestFocus();
     }
 
-    /**
-     * Démarre le mode automatique : chaque robot agit toutes les 500 ms.
-     */
     private void demarrerModeAuto(Button btn) {
         if (auto != null && auto.getStatus() == javafx.animation.Animation.Status.RUNNING) {
             auto.stop();
@@ -90,20 +87,24 @@ public class MainFX extends Application {
             return;
         }
 
-        auto = new Timeline(new KeyFrame(Duration.millis(500), ev -> {
-            if (toutesMinesVides()) {
-                auto.stop();
-                btn.setText("✓ Termine !");
-                System.out.println("=== Toutes les mines sont vides ! Tours : " + monde.getTourActuel() + " ===");
-                return;
-            }
+        auto = new Timeline(new KeyFrame(Duration.millis(600), ev -> {
+            Platform.runLater(() -> {
+                if (toutesMinesVides()) {
+                    auto.stop();
+                    btn.setText("✓ Terminé !");
+                    System.out.println("=== Fin ! Tours : " + monde.getTourActuel() + " ===");
+                    return;
+                }
 
-            for (Robot robot : robots) {
-                robot.agirAutonome(grille, mines, entrepots);
-            }
+                for (Robot robot : robots) {
+                    robot.agirAutonome(grille, mines, entrepots);
+                }
 
-            monde.jouerTour();
-            vue.rafraichir();
+                // incrementerTour() au lieu de jouerTour()
+                // → pas de Scanner, pas de fuite mémoire
+                monde.incrementerTour();
+                vue.rafraichir();
+            });
         }));
 
         auto.setCycleCount(Timeline.INDEFINITE);
@@ -135,9 +136,7 @@ public class MainFX extends Application {
     private void ajouterRobot(int numero, TypeMinerai type) {
         Secteur secteur = getSecteurLibre();
         Robot robot = new Robot(
-                numero,
-                secteur,
-                type,
+                numero, secteur, type,
                 5 + random.nextInt(5),
                 1 + random.nextInt(3)
         );
@@ -148,14 +147,10 @@ public class MainFX extends Application {
     private Secteur getSecteurLibre() {
         Secteur secteur;
         do {
-            int ligne = random.nextInt(10);
+            int ligne   = random.nextInt(10);
             int colonne = random.nextInt(10);
             secteur = grille[ligne][colonne];
-        } while (
-                secteur.EstEau()
-                        || secteur.getComposante() != null
-                        || secteur.getRobot() != null
-        );
+        } while (secteur.EstEau() || secteur.getComposante() != null || secteur.getRobot() != null);
         return secteur;
     }
 

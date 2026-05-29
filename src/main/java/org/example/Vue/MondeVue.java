@@ -92,7 +92,6 @@ public class MondeVue extends BorderPane {
         messageLabel.setPadding(new Insets(8));
         messageLabel.setMaxWidth(Double.MAX_VALUE);
         messageLabel.setAlignment(Pos.CENTER);
-        // Style par défaut (neutre)
         messageLabel.setStyle("""
                 -fx-background-color: #EFE2C6;
                 -fx-background-radius: 8;
@@ -112,7 +111,6 @@ public class MondeVue extends BorderPane {
                 -fx-border-width: 1.5;
                 """);
 
-        // CRITÈRE BASTIEN & SCAPIN : Contrôle Explicite (Boutons d'interface)
         VBox controles = creerBoutonsActions();
 
         panneauInfos.setFillWidth(true);
@@ -128,28 +126,27 @@ public class MondeVue extends BorderPane {
         return panneau;
     }
 
-    // Méthode pour générer les boutons cliquables
     private VBox creerBoutonsActions() {
         GridPane croixDir = new GridPane();
         croixDir.setAlignment(Pos.CENTER);
         croixDir.setHgap(5);
         croixDir.setVgap(5);
 
-        Button btnHaut = creerBouton("↑ NORD", KeyCode.UP);
-        Button btnBas = creerBouton("↓ SUD", KeyCode.DOWN);
+        Button btnHaut   = creerBouton("↑ NORD",  KeyCode.UP);
+        Button btnBas    = creerBouton("↓ SUD",   KeyCode.DOWN);
         Button btnGauche = creerBouton("← OUEST", KeyCode.LEFT);
-        Button btnDroite = creerBouton("→ EST", KeyCode.RIGHT);
+        Button btnDroite = creerBouton("→ EST",   KeyCode.RIGHT);
 
-        croixDir.add(btnHaut, 1, 0);
+        croixDir.add(btnHaut,   1, 0);
         croixDir.add(btnGauche, 0, 1);
-        croixDir.add(btnBas, 1, 1);
+        croixDir.add(btnBas,    1, 1);
         croixDir.add(btnDroite, 2, 1);
 
         HBox actions = new HBox(10);
         actions.setAlignment(Pos.CENTER);
         actions.setPadding(new Insets(10, 0, 0, 0));
         Button btnRecolter = creerBouton(" Récolter (R)", KeyCode.R);
-        Button btnDeposer = creerBouton(" Déposer (D)", KeyCode.D);
+        Button btnDeposer  = creerBouton(" Déposer (D)",  KeyCode.D);
         actions.getChildren().addAll(btnRecolter, btnDeposer);
 
         VBox conteneur = new VBox(5, new Label("CONTRÔLES MANUELS :"), croixDir, actions);
@@ -162,7 +159,7 @@ public class MondeVue extends BorderPane {
     private Button creerBouton(String texte, KeyCode codeAssocie) {
         Button btn = new Button(texte);
         btn.setStyle("-fx-background-color: #EFE2C6; -fx-border-color: #8A6338; -fx-border-radius: 5; -fx-background-radius: 5; -fx-cursor: hand;");
-        btn.setOnAction(e -> executerAction(codeAssocie)); // Relie le clic de souris à la même logique que le clavier
+        btn.setOnAction(e -> executerAction(codeAssocie));
         return btn;
     }
 
@@ -171,10 +168,9 @@ public class MondeVue extends BorderPane {
         label.setWrapText(true);
         label.setMaxWidth(Double.MAX_VALUE);
         label.setPadding(new Insets(10));
-
-        // CRITÈRE BASTIEN & SCAPIN : Charge de travail (Mise en évidence du robot actif)
-        String bordure = estActif ? "-fx-border-color: #E74C3C; -fx-border-width: 3;" : "-fx-border-color: #7A4E24; -fx-border-width: 1;";
-
+        String bordure = estActif
+                ? "-fx-border-color: #E74C3C; -fx-border-width: 3;"
+                : "-fx-border-color: #7A4E24; -fx-border-width: 1;";
         label.setStyle("""
                 -fx-background-color: %s;
                 -fx-background-radius: 10;
@@ -199,7 +195,7 @@ public class MondeVue extends BorderPane {
         for (int ligne = 0; ligne < 10; ligne++) {
             for (int colonne = 0; colonne < 10; colonne++) {
                 Robot robot = monde.getGrille()[ligne][colonne].getRobot();
-                if (robot != null) { robots.add(robot); }
+                if (robot != null) robots.add(robot);
             }
         }
         robots.sort(Comparator.comparingInt(Robot::getNumero));
@@ -214,29 +210,26 @@ public class MondeVue extends BorderPane {
     }
 
     public void ajouterControleClavier(Scene scene) {
-        // Le clavier et les clics de souris passent maintenant par la même méthode
         scene.setOnKeyPressed(event -> executerAction(event.getCode()));
     }
 
-    // Centralisation de la logique (Évite de dupliquer le code entre clavier et clics)
     private void executerAction(KeyCode code) {
         Robot robot = getRobotActuel();
         if (robot == null) return;
 
-        boolean actionValide = false;
+        boolean actionValide   = false;
         boolean toucheReconnue = true;
 
-        if (code == KeyCode.UP) { actionValide = robot.avancer(Directions.NORD, monde.getGrille()); }
-        else if (code == KeyCode.DOWN) { actionValide = robot.avancer(Directions.SUD, monde.getGrille()); }
-        else if (code == KeyCode.LEFT) { actionValide = robot.avancer(Directions.OUEST, monde.getGrille()); }
-        else if (code == KeyCode.RIGHT) { actionValide = robot.avancer(Directions.EST, monde.getGrille()); }
-        else if (code == KeyCode.R) { actionValide = robot.recolter(); }
-        else if (code == KeyCode.D) { actionValide = robot.deposer(); }
+        if      (code == KeyCode.UP)    { actionValide = robot.avancer(Directions.NORD,  monde.getGrille()); }
+        else if (code == KeyCode.DOWN)  { actionValide = robot.avancer(Directions.SUD,   monde.getGrille()); }
+        else if (code == KeyCode.LEFT)  { actionValide = robot.avancer(Directions.OUEST, monde.getGrille()); }
+        else if (code == KeyCode.RIGHT) { actionValide = robot.avancer(Directions.EST,   monde.getGrille()); }
+        else if (code == KeyCode.R)     { actionValide = robot.recolter(); }
+        else if (code == KeyCode.D)     { actionValide = robot.deposer();  }
         else { toucheReconnue = false; }
 
         if (!toucheReconnue) return;
 
-        // CRITÈRE BASTIEN & SCAPIN : Gestion des erreurs (Changement visuel drastique)
         if (actionValide) {
             actionsTour++;
             if (actionsTour >= recupererRobots().size()) {
@@ -244,9 +237,7 @@ public class MondeVue extends BorderPane {
                 actionsTour = 0;
             }
             robotActuel++;
-            if (robotActuel >= recupererRobots().size()) {
-                robotActuel = 0;
-            }
+            if (robotActuel >= recupererRobots().size()) robotActuel = 0;
             messageLabel.setStyle("-fx-background-color: #D4EDDA; -fx-border-color: #C3E6CB; -fx-text-fill: #155724; -fx-background-radius: 8; -fx-border-radius: 8; -fx-font-weight: bold; -fx-font-size: 14;");
             messageLabel.setText("✔ Action réussie");
         } else {
@@ -279,11 +270,11 @@ public class MondeVue extends BorderPane {
         panneauInfos.getChildren().add(titreSection("ROBOTS"));
 
         for (Robot r : recupererRobots()) {
-            String nom = r.getType() == TypeMinerai.OR ? "robot_or" : "robot_nickel";
+            String nom     = r.getType() == TypeMinerai.OR ? "robot_or" : "robot_nickel";
             String couleur = r.getType() == TypeMinerai.OR ? "#FFD166" : "#74B9E7";
 
             String texte = nom
-                    + "\nStockage : " + r.getNbMinerais() + " / " + r.getCapaciteStockage()
+                    + "\nStockage : "   + r.getNbMinerais()        + " / " + r.getCapaciteStockage()
                     + "\nExtraction : " + r.getCapaciteExtraction() + " min/action";
 
             Composantes comp = r.getSecteur().getComposante();
@@ -294,7 +285,6 @@ public class MondeVue extends BorderPane {
                 texte += entrepot.getType() == TypeMinerai.OR ? "\nSur : entrepot_or" : "\nSur : entrepot_nickel";
             }
 
-            // On vérifie si c'est le tour de ce robot pour le mettre en évidence (Bordure rouge)
             boolean estActif = (r == robotDutour);
             panneauInfos.getChildren().add(badge(texte, couleur, "#2B2114", estActif));
         }
@@ -307,7 +297,7 @@ public class MondeVue extends BorderPane {
                 Composantes composante = monde.getGrille()[ligne][colonne].getComposante();
 
                 if (composante instanceof Mine mine) {
-                    String nom = mine.getType() == TypeMinerai.OR ? "mine_or" : "mine_nickel";
+                    String nom     = mine.getType() == TypeMinerai.OR ? "mine_or" : "mine_nickel";
                     String couleur = mine.getType() == TypeMinerai.OR ? "#D4A017" : "#5DA9D6";
                     panneauInfos.getChildren().add(
                             badge(nom + "\nMinerais : " + mine.getNbMinerais() + " / " + mine.getCapaciteInitiale(), couleur, "#2B2114", false)
@@ -315,7 +305,7 @@ public class MondeVue extends BorderPane {
                 }
 
                 if (composante instanceof Entrepot entrepot) {
-                    String nom = entrepot.getType() == TypeMinerai.OR ? "entrepot_or" : "entrepot_nickel";
+                    String nom     = entrepot.getType() == TypeMinerai.OR ? "entrepot_or" : "entrepot_nickel";
                     String couleur = entrepot.getType() == TypeMinerai.OR ? "#F7C948" : "#9AD1D4";
                     panneauInfos.getChildren().add(
                             badge(nom + "\nStock : " + entrepot.getStock(), couleur, "#2B2114", false)
