@@ -3,15 +3,12 @@ package org.example.Model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 
 public class Main {
 
     static Random random = new Random();
 
     public static void main(String[] args) {
-
-        Scanner scanner = new Scanner(System.in);
 
         Monde monde = new Monde(null, 0);
         monde.initialiser();
@@ -53,16 +50,17 @@ public class Main {
         sRobot2.setRobot(robot2);
         robots.add(robot2);
 
-        System.out.println("=== SAE 2.01 - Robots Mineurs ===");
-        System.out.println("Le jeu se termine quand toutes les mines sont vides.\n");
+        System.out.println("=== SAE 2.02 - Robots Mineurs Autonomes ===");
+        System.out.println("Les robots agissent automatiquement.\n");
 
         while (!toutesVides(mines)) {
 
             monde.afficher();
             afficherInfos(mines, entrepots, robots, monde.getTourActuel());
 
+            // Chaque robot agit tout seul grâce à A*
             for (Robot robot : robots) {
-                robot.choisirAction(grille, scanner);
+                robot.agirAutonome(grille, mines, entrepots);
             }
 
             monde.jouerTour();
@@ -79,8 +77,6 @@ public class Main {
                     + " " + typeStr
                     + " " + e.getStock());
         }
-
-        scanner.close();
     }
 
     private static Secteur getSecteurLibre(Secteur[][] grille) {
