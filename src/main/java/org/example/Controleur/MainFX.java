@@ -38,10 +38,18 @@ public class MainFX extends Application {
         monde.initialiser();
         grille = monde.getGrille();
 
+        // --- GÉNÉRATION DU TERRAIN ET DES OBJECTIFS ---
+
+        // 2 Mines d'OR et 2 Mines de NICKEL
         ajouterMine(1, TypeMinerai.OR);
         ajouterMine(2, TypeMinerai.NICKEL);
+
+        // 1 Entrepôt d'OR et 1 Entrepôt de NICKEL (Idéal pour créer un point de rassemblement)
         ajouterEntrepot(1, TypeMinerai.OR);
         ajouterEntrepot(2, TypeMinerai.NICKEL);
+
+
+        // 4 Robots (2 Spécialisés OR, 2 Spécialisés NICKEL)
         ajouterRobot(1, TypeMinerai.OR);
         ajouterRobot(2, TypeMinerai.NICKEL);
 
