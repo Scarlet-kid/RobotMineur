@@ -15,7 +15,7 @@ public class Dijkstra {
         int cols   = grille[0].length;
 
         // Distance minimale depuis le depart (sert aussi à savoir si une case a été visitée)
-        int[][] distance = new int[lignes][cols];
+        int[][] distance = new int[lignes][cols]; // matrice virtuelle du monde
 
         // Enregistre la direction prise pour arriver à une case donnée (remplace tes anciens parentLigne/Colonne)
         Directions[][] directionPrise = new Directions[lignes][cols];
