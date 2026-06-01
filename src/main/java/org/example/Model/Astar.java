@@ -20,24 +20,23 @@ public class Astar {
             { 1,  0},
             { 0,  1},
             { 0, -1}
-    };
+    }; // les voisins.
 
     public Astar(Secteur[][] grille) {
         this.grille = grille;
-    }
+    } // le constructeur.
 
     public List<Secteur> trouverChemin(Secteur depart, Secteur arrivee, Robot robotCourant) {
 
-        // Cas trivial : départ = arrivée
         if (depart == arrivee) {
-            return new ArrayList<>();
+            return new ArrayList<>(); // une liste vide.
         }
 
         PriorityQueue<Noeud> openList = new PriorityQueue<>();
-        Map<String, Integer> meilleurG = new HashMap<>();
+        Map<String, Integer> meilleurG = new HashMap<>(); // un dictionnaire.
 
         // Compteur de noeuds explorés
-        int nbNoeudsExplores = 0;
+        int nbNoeudsExplores = 0; // techniquement un noeud c'est un sommet et dans notre contexte.
 
         int hDepart = heuristique(depart, arrivee);
         Noeud noeudDepart = new Noeud(depart, null, 0, hDepart);
@@ -48,7 +47,7 @@ public class Astar {
         while (!openList.isEmpty()) {
 
             // Si on a trop exploré → on arrête pour ne pas saturer la mémoire
-            if (nbNoeudsExplores >= MAX_NOEUDS) {
+            if (nbNoeudsExplores >= MAX_NOEUDS) { // je pense on pourrait diminuer le nb de noeud max.
                 return new ArrayList<>();
             }
 
