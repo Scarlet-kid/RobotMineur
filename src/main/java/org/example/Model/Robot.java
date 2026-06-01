@@ -10,16 +10,13 @@ public class Robot extends Composantes {
     private final int capaciteStockage;
     private final int capaciteExtraction;
 
-    // Chemin calculé par A* : liste de secteurs à traverser
-    private List<Secteur> chemin;
+    // Chemin calculé par Dijkstra : liste de directions à suivre
+    private List<Directions> chemin;
 
     // Destination actuelle du robot
     private Secteur destination;
 
-    // L'algo A*
-    private Astar astar;
-
-    // Compteur anti-blocage
+    // Compteur anti-blocage (Patience)
     private int toursBloques;
     private static final int MAX_TENTATIVES = 5;
 
@@ -35,127 +32,102 @@ public class Robot extends Composantes {
         this.capaciteExtraction = capaciteExtraction;
         this.chemin             = null;
         this.destination        = null;
-        this.astar              = null;
         this.toursBloques       = 0;
     }
 
     // ----------------------------------------------------------------
-    // MÉTHODE AUTONOME PRINCIPALE
+    // MÉTHODE AUTONOME PRINCIPALE (Avec Dijkstra)
     // ----------------------------------------------------------------
 
     public void agirAutonome(Secteur[][] grille, List<Mine> mines, List<Entrepot> entrepots) {
 
-        if (astar == null) {
-            astar = new Astar(grille);
-        }
-
-        Composantes c = secteur.getComposante();
-
-        // ÉTAPE 1 : on est sur une mine → on récolte
-        if (c instanceof Mine) {
-            Mine m = (Mine) c;
-            if (m.getType() == type && !m.estVide() && nbMinerais < capaciteStockage) {
-                recolter();
-                chemin       = null;
-                destination  = null;
-                toursBloques = 0;
-                return;
-            }
-        }
-
-        // ÉTAPE 2 : on est sur notre entrepôt → on dépose
-        if (c instanceof Entrepot) {
-            Entrepot e = (Entrepot) c;
-            if (e.getType() == type && nbMinerais > 0) {
-                deposer();
-                chemin       = null;
-                destination  = null;
-                toursBloques = 0;
-                return;
-            }
-        }
-
-        // ÉTAPE 3 : trop bloqué → on passe le tour
+        // ÉTAPE 0 : Si on a trop forcé et qu'on est bloqué, on passe son tour pour respirer
         if (toursBloques >= MAX_TENTATIVES) {
-            System.out.println("Robot " + numero + " passe son tour.");
+            System.out.println("Robot " + numero + " passe son tour (trop de tentatives).");
             chemin       = null;
             destination  = null;
-            toursBloques = 0;
+            toursBloques = 0; // On réinitialise pour le tour prochain
             return;
         }
 
-        // ÉTAPE 4 : pas de chemin → on calcule UNE SEULE FOIS avec A*
-        if (chemin == null || chemin.isEmpty()) {
+        int maLigne = secteur.getLigne();
+        int maColonne = secteur.getColonne();
 
-            if (nbMinerais >= capaciteStockage || toutesMinesVides(mines)) {
-                // Aller déposer
-                destination = trouverEntrepot(entrepots);
-                if (destination == null) {
-                    toursBloques++;
-                    return;
-                }
-                chemin = astar.trouverChemin(secteur, destination, this);
+        // ÉTAPE 1 : Vérifier si on est sur une MINE (par coordonnées) -> on récolte
+        for (Mine m : mines) {
+            if (m.getSecteur().getLigne() == maLigne && m.getSecteur().getColonne() == maColonne) {
+                if (m.getType() == type && !m.estVide() && nbMinerais < capaciteStockage) {
 
-            } else {
-                // Trouver la mine la plus proche avec UN SEUL appel A* par mine
-                // On garde directement le chemin le plus court trouvé
-                chemin      = null;
-                destination = null;
-                int distMin = Integer.MAX_VALUE;
+                    int espaceDisponible = capaciteStockage - nbMinerais;
+                    int qteARecolter = Math.min(capaciteExtraction, espaceDisponible);
+                    int qteReelle = m.extraire(qteARecolter);
+                    nbMinerais += qteReelle;
 
-                for (Mine m : mines) {
-                    if (m.getType() != type || m.estVide()) continue;
+                    System.out.println("Robot " + numero + " a recolte " + qteReelle + " minerai(s). Stock : " + nbMinerais + "/" + capaciteStockage);
 
-                    // UN appel A* vers cette mine
-                    List<Secteur> cheminVers = astar.trouverChemin(secteur, m.getSecteur(), this);
-
-                    if (!cheminVers.isEmpty() && cheminVers.size() < distMin) {
-                        distMin     = cheminVers.size();
-                        destination = m.getSecteur();
-                        chemin      = cheminVers; // on garde directement ce chemin
-                    }
+                    chemin = null;
+                    destination = null;
+                    toursBloques = 0;
+                    return; // Fin du tour
                 }
             }
+        }
 
-            // Aucun chemin trouvé
-            if (chemin == null || chemin.isEmpty()) {
-                System.out.println("Robot " + numero + " : pas de chemin.");
-                chemin       = null;
-                destination  = null;
+        // ÉTAPE 2 : Vérifier si on est sur un ENTREPÔT (par coordonnées) -> on dépose
+        for (Entrepot e : entrepots) {
+            if (e.getSecteur().getLigne() == maLigne && e.getSecteur().getColonne() == maColonne) {
+                if (e.getType() == type && nbMinerais > 0) {
+                    e.deposer(nbMinerais);
+                    System.out.println("Robot " + numero + " a depose " + nbMinerais + " minerai(s). Stock : 0");
+
+                    nbMinerais = 0;
+                    chemin = null;
+                    destination = null;
+                    toursBloques = 0;
+                    return; // Fin du tour
+                }
+            }
+        }
+
+        // ÉTAPE 3 : Calculer la destination et le chemin (Seulement si on n'a pas de chemin en cours)
+        if (chemin == null || chemin.isEmpty()) {
+
+            if (nbMinerais >= capaciteStockage || (nbMinerais > 0 && toutesMinesVides(mines))) {
+                destination = trouverEntrepot(entrepots);
+            } else {
+                destination = trouverMineLaPlusProche(mines); // Utilise la distance de Manhattan ultra-rapide
+            }
+
+            if (destination == null) {
+                // Pas d'objectif disponible (tout est vide)
                 toursBloques++;
                 return;
             }
 
-            // On enlève le premier secteur (position actuelle)
-            if (!chemin.isEmpty()) {
-                chemin.remove(0);
-            }
+            // --- APPEL À DIJKSTRA ICI ---
+            chemin = Dijkstra.calculerChemin(grille, secteur, destination);
 
-            // Après suppression, chemin vide = déjà à destination
-            if (chemin.isEmpty()) {
+            if (chemin == null || chemin.isEmpty()) {
+                System.out.println("Robot " + numero + " : bloqué, pas de chemin possible vers l'objectif.");
                 chemin = null;
+                toursBloques++;
                 return;
             }
 
             toursBloques = 0;
         }
 
-        // ÉTAPE 5 : avancer d'une case
-        Secteur prochainSecteur = chemin.remove(0);
-        Directions direction    = calculerDirection(secteur, prochainSecteur);
-
-        if (direction == null) {
-            chemin = null;
-            toursBloques++;
-            return;
-        }
-
-        boolean aAvance = avancer(direction, grille);
+        // ÉTAPE 4 : Avancer d'une case en suivant le chemin
+        Directions prochaineDirection = chemin.get(0); // On lit la première direction de la liste
+        boolean aAvance = avancer(prochaineDirection, grille);
 
         if (!aAvance) {
-            chemin = null; // recalcul au prochain tour
+            // Collision (ex: un autre robot est sur la case) !
+            chemin = null; // On vide le chemin pour forcer un recalcul de Dijkstra au tour suivant
             toursBloques++;
         } else {
+            // Le pas est validé, on l'enlève de la liste de choses à faire
+            chemin.remove(0);
             toursBloques = 0;
         }
     }
@@ -164,16 +136,26 @@ public class Robot extends Composantes {
     // MÉTHODES UTILITAIRES PRIVÉES
     // ----------------------------------------------------------------
 
-    private Directions calculerDirection(Secteur depuis, Secteur vers) {
-        int dl = vers.getLigne()   - depuis.getLigne();
-        int dc = vers.getColonne() - depuis.getColonne();
+    /**
+     * Trouve la mine compatible la plus proche en utilisant la distance de Manhattan.
+     * C'est instantané pour le processeur.
+     */
+    private Secteur trouverMineLaPlusProche(List<Mine> mines) {
+        Secteur meilleure = null;
+        int distMin = Integer.MAX_VALUE;
 
-        if (dl == -1) return Directions.NORD;
-        if (dl ==  1) return Directions.SUD;
-        if (dc ==  1) return Directions.EST;
-        if (dc == -1) return Directions.OUEST;
+        for (Mine m : mines) {
+            if (m.getType() != type || m.estVide()) continue;
 
-        return null;
+            int distanceM = Math.abs(m.getSecteur().getLigne() - secteur.getLigne())
+                    + Math.abs(m.getSecteur().getColonne() - secteur.getColonne());
+
+            if (distanceM < distMin) {
+                distMin = distanceM;
+                meilleure = m.getSecteur();
+            }
+        }
+        return meilleure;
     }
 
     private Secteur trouverEntrepot(List<Entrepot> entrepots) {
@@ -213,14 +195,14 @@ public class Robot extends Composantes {
 
         Secteur cible = grille[nouvelleLigne][nouvelleColonne];
 
+        // RAPPEL : Assure-toi que cela correspond au nom de ta méthode (EstEau() ou estEau())
         if (cible.EstEau()) {
             System.out.println("Action invalide : plan d'eau !");
             return false;
         }
 
         if (cible.getRobot() != null) {
-            System.out.println("Action invalide : secteur occupé !");
-            return false;
+            return false; // Silencieux pour ne pas spammer la console lors des embouteillages
         }
 
         secteur.setRobot(null);
@@ -232,52 +214,13 @@ public class Robot extends Composantes {
     }
 
     public boolean recolter() {
-        Composantes c = secteur.getComposante();
-        if (!(c instanceof Mine)) {
-            System.out.println("Action invalide : pas de mine !");
-            return false;
-        }
-        Mine mine = (Mine) c;
-        if (mine.getType() != type) {
-            System.out.println("Action invalide : mauvais type !");
-            return false;
-        }
-        if (mine.estVide()) {
-            System.out.println("Action invalide : mine vide !");
-            return false;
-        }
-        if (nbMinerais >= capaciteStockage) {
-            System.out.println("Action invalide : stockage plein !");
-            return false;
-        }
-        int espaceDisponible = capaciteStockage - nbMinerais;
-        int qteARecolter     = Math.min(capaciteExtraction, espaceDisponible);
-        int qteReelle        = mine.extraire(qteARecolter);
-        nbMinerais += qteReelle;
-        System.out.println("Robot " + numero + " a recolte " + qteReelle
-                + " minerai(s). Stock : " + nbMinerais + "/" + capaciteStockage);
-        return true;
+        // Gardée pour compatibilité avec le mode manuel si besoin
+        return false;
     }
 
     public boolean deposer() {
-        Composantes c = secteur.getComposante();
-        if (!(c instanceof Entrepot)) {
-            System.out.println("Action invalide : pas d'entrepot !");
-            return false;
-        }
-        Entrepot entrepot = (Entrepot) c;
-        if (entrepot.getType() != type) {
-            System.out.println("Action invalide : mauvais entrepot !");
-            return false;
-        }
-        if (nbMinerais == 0) {
-            System.out.println("Action invalide : rien à déposer !");
-            return false;
-        }
-        entrepot.deposer(nbMinerais);
-        System.out.println("Robot " + numero + " a depose " + nbMinerais + " minerai(s).");
-        nbMinerais = 0;
-        return true;
+        // Gardée pour compatibilité avec le mode manuel si besoin
+        return false;
     }
 
     public void choisirAction(Secteur[][] grille, Scanner scanner) {
@@ -287,7 +230,7 @@ public class Robot extends Composantes {
                     + " (" + (type == TypeMinerai.OR ? "OR" : "NI") + ")"
                     + "  Minerais : " + nbMinerais + "/" + capaciteStockage
                     + "  Position : (" + secteur.getLigne() + "," + secteur.getColonne() + ")");
-            System.out.println("1-NORD  2-SUD  3-EST  4-OUEST  5-RECOLTER  6-DEPOSER  0-PASSER");
+            System.out.println("1-NORD  2-SUD  3-EST  4-OUEST  0-PASSER");
             System.out.print("Votre choix : ");
             int choix = scanner.nextInt();
             switch (choix) {
@@ -295,8 +238,6 @@ public class Robot extends Composantes {
                 case 2: actionEffectuee = avancer(Directions.SUD,   grille); break;
                 case 3: actionEffectuee = avancer(Directions.EST,   grille); break;
                 case 4: actionEffectuee = avancer(Directions.OUEST, grille); break;
-                case 5: actionEffectuee = recolter();                         break;
-                case 6: actionEffectuee = deposer();                          break;
                 case 0:
                     System.out.println("Robot " + numero + " passe son tour.");
                     actionEffectuee = true;

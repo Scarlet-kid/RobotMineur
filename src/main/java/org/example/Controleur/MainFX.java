@@ -51,15 +51,8 @@ public class MainFX extends Application {
         btnAuto.setStyle("-fx-background-color: #2A7A2A; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;");
         btnAuto.setOnAction(e -> demarrerModeAuto(btnAuto));
 
-        Button btnReset = new Button("↺ Reinitialiser");
-        btnReset.setStyle("-fx-background-color: #7A2A2A; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;");
-        btnReset.setOnAction(e -> {
-            if (auto != null) auto.stop();
-            stage.close();
-            try { start(new Stage()); } catch (Exception ex) { ex.printStackTrace(); }
-        });
-
-        HBox barreBoutons = new HBox(10, btnAuto, btnReset);
+        // Barre de boutons avec uniquement le bouton Auto
+        HBox barreBoutons = new HBox(10, btnAuto);
         barreBoutons.setAlignment(Pos.CENTER);
         barreBoutons.setPadding(new Insets(10));
         barreBoutons.setStyle("-fx-background-color: #1E2A3A;");
@@ -71,12 +64,19 @@ public class MainFX extends Application {
         Scene scene = new Scene(root, 1600, 900);
         vue.ajouterControleClavier(scene);
 
-        stage.setTitle("Robots mineurs - Mode autonome (A*)");
+        stage.setTitle("Robots mineurs - Mode autonome");
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.setResizable(true);
-        stage.show();
 
+        // Sécurité supplémentaire : s'assurer que la boucle s'arrête si on ferme la fenêtre en cours de route
+        stage.setOnCloseRequest(e -> {
+            if (auto != null) auto.stop();
+            Platform.exit();
+            System.exit(0);
+        });
+
+        stage.show();
         vue.requestFocus();
     }
 
@@ -89,10 +89,11 @@ public class MainFX extends Application {
 
         auto = new Timeline(new KeyFrame(Duration.millis(600), ev -> {
             Platform.runLater(() -> {
-                if (toutesMinesVides()) {
+
+                if (conditionVictoire()) {
                     auto.stop();
                     btn.setText("✓ Terminé !");
-                    System.out.println("=== Fin ! Tours : " + monde.getTourActuel() + " ===");
+                    System.out.println("=== Fin ! Tous les minerais sont sécurisés. Tours : " + monde.getTourActuel() + " ===");
                     return;
                 }
 
@@ -100,8 +101,6 @@ public class MainFX extends Application {
                     robot.agirAutonome(grille, mines, entrepots);
                 }
 
-                // incrementerTour() au lieu de jouerTour()
-                // → pas de Scanner, pas de fuite mémoire
                 monde.incrementerTour();
                 vue.rafraichir();
             });
@@ -112,10 +111,15 @@ public class MainFX extends Application {
         btn.setText("⏸ Arreter mode auto");
     }
 
-    private boolean toutesMinesVides() {
+    private boolean conditionVictoire() {
         for (Mine m : mines) {
             if (!m.estVide()) return false;
         }
+
+        for (Robot r : robots) {
+            if (r.getNbMinerais() > 0) return false;
+        }
+
         return true;
     }
 
