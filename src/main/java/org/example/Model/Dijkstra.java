@@ -62,9 +62,9 @@ public class Dijkstra {
 
                 // Si la case n'a pas encore été visitée
                 if (distance[nl][nc] == Integer.MAX_VALUE) {
-                    distance[nl][nc] = distance[l][c] + 1; // voit pas trop.
+                    distance[nl][nc] = distance[l][c] + 1; //On incremente de 1 la distance pour arriver a celle ci.
                     directionPrise[nl][nc] = directionsMap[i]; // On mémorise la direction prise
-                    file.add(new int[]{nl, nc});
+                    file.add(new int[]{nl, nc}); // Ajout a la file des sommets traités.
                 }
             }
         }

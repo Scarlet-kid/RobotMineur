@@ -98,7 +98,7 @@ public class MainFX extends Application {
             return;
         }
 
-        auto = new Timeline(new KeyFrame(Duration.millis(600), ev -> {
+        auto = new Timeline(new KeyFrame(Duration.millis(1000), ev -> {
             Platform.runLater(() -> {
 
                 if (conditionVictoire()) {

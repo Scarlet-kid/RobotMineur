@@ -73,7 +73,7 @@ public class Robot extends Composantes {
             }
         }
 
-        // ÉTAPE 3 : Choix de l'objectif et calcul du CHEMIN OPTIMAL (100% Dijkstra)
+        // ÉTAPE 3 : Choix de l'objectif et calcul du CHEMIN OPTIMAL
         if (chemin == null || chemin.isEmpty()) {
 
             if (toursDeFuite > 0) {
@@ -128,12 +128,6 @@ public class Robot extends Composantes {
         }
     }
 
-    // --- NOUVELLES MÉTHODES 100% DIJKSTRA ---
-
-    /**
-     * Teste tous les chemins possibles vers les mines valides via Dijkstra
-     * et conserve uniquement le trajet le plus court.
-     */
     private List<Directions> chercherMeilleurCheminMine(Secteur[][] grille, List<Mine> mines) {
         List<Directions> meilleurChemin = null;
         int distanceMin = Integer.MAX_VALUE;
@@ -152,9 +146,6 @@ public class Robot extends Composantes {
         return meilleurChemin;
     }
 
-    /**
-     * Teste tous les chemins possibles vers les entrepôts valides via Dijkstra.
-     */
     private List<Directions> chercherMeilleurCheminEntrepot(Secteur[][] grille, List<Entrepot> entrepots) {
         List<Directions> meilleurChemin = null;
         int distanceMin = Integer.MAX_VALUE;
@@ -173,7 +164,6 @@ public class Robot extends Composantes {
         return meilleurChemin;
     }
 
-    // --- MÉTHODES UTILITAIRES PRIVÉES ---
 
     private void resetTrajetEtConflits() {
         chemin = null;
@@ -203,7 +193,7 @@ public class Robot extends Composantes {
         return true;
     }
 
-    // --- MÉTHODES SAE 2.01 INCHANGÉES ---
+    // --- MÉTHODES SAE 2.01 INCHANGEES ---
 
     public boolean avancer(Directions dir, Secteur[][] grille) {
         if (secteur == null) return false;
@@ -233,7 +223,6 @@ public class Robot extends Composantes {
     public boolean deposer() { return false; }
     public void choisirAction(Secteur[][] grille, Scanner scanner) {}
 
-    // --- GETTERS / SETTERS ---
     public int getNumero() { return numero; }
     public TypeMinerai getType() { return type; }
     public int getNbMinerais() { return nbMinerais; }
